@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Account — Vasiliki Race</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<nav class="nav scrolled">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <span class="logo-main">Vasiliki Race</span>
+      <span class="logo-sub">Lefkada · Greece</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html" data-i18n="nav.home">Home</a></li>
+      <li><a href="register.html" data-i18n="nav.register">Register</a></li>
+      <li><a href="contact.html" data-i18n="nav.contact">Contact</a></li>
+    </ul>
+    <div class="nav-actions">
+      <div class="lang-toggle"><button data-lang="en">EN</button><button data-lang="el">ΕΛ</button></div>
+      <button id="nav-logout-btn" class="btn btn-outline btn-sm" data-i18n="account.logout">Sign Out</button>
+    </div>
+    <button class="nav-hamburger"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<main class="account-page">
+  <div class="container" style="max-width:800px">
+
+    <div class="account-header reveal">
+      <div class="account-avatar">👤</div>
+      <div class="section-label" data-i18n="account.welcome">Welcome back</div>
+      <h1 class="section-title" id="account-name">—</h1>
+      <p style="color:var(--text-muted);font-size:0.9rem" id="account-email">—</p>
+    </div>
+
+    <!-- Registrations -->
+    <div class="card reveal" style="margin-bottom:1.5rem">
+      <h2 style="font-family:var(--font-h);font-size:1.1rem;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:1.5rem" data-i18n="account.my_regs">My Registrations</h2>
+
+      <div id="regs-loading" style="color:var(--text-muted);font-size:0.9rem">Loading...</div>
+      <div id="regs-empty" style="display:none;text-align:center;padding:2rem 0">
+        <p style="color:var(--text-muted);margin-bottom:1rem" data-i18n="account.no_regs">You haven't registered for any races yet.</p>
+        <a href="register.html" class="btn btn-primary btn-sm" data-i18n="account.reg_btn">Register Now</a>
+      </div>
+
+      <div id="regs-table-wrap" style="display:none;overflow-x:auto">
+        <table class="reg-table" id="regs-table">
+          <thead>
+            <tr>
+              <th data-i18n="account.race">Race</th>
+              <th data-i18n="account.category">Category</th>
+              <th data-i18n="account.status">Payment</th>
+              <th data-i18n="account.date">Date</th>
+            </tr>
+          </thead>
+          <tbody id="regs-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Refund info -->
+    <div class="card reveal" style="border-color:rgba(255,193,7,0.2)">
+      <h3 style="font-family:var(--font-h);font-size:0.9rem;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem;color:#FFC107">Refund Policy</h3>
+      <p style="font-size:0.88rem;color:var(--text-muted);line-height:1.7">
+        Refunds are processed manually. If you need a refund, please contact us through the
+        <a href="contact.html" style="color:var(--accent)">contact page</a>.
+      </p>
+    </div>
+
+  </div>
+</main>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/i18n.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const user = await getUser();
+  if (!user) { window.location.href = 'login.html?redirect=my-account.html'; return; }
+
+  document.getElementById('account-name').textContent  = user.user_metadata?.full_name || 'Runner';
+  document.getElementById('account-email').textContent = user.email;
+
+  const regs = await getMyRegistrations();
+  const loading = document.getElementById('regs-loading');
+  const empty   = document.getElementById('regs-empty');
+  const tableWrap = document.getElementById('regs-table-wrap');
+  const tbody   = document.getElementById('regs-tbody');
+
+  loading.style.display = 'none';
+
+  if (!regs.length) { empty.style.display = 'block'; return; }
+
+  tableWrap.style.display = 'block';
+  regs.forEach(r => {
+    const badgeClass = r.payment_status === 'paid' ? 'badge-paid' : r.payment_status === 'refunded' ? 'badge-refunded' : 'badge-pending';
+    const statusKey  = r.payment_status === 'paid' ? 'account.status_paid' : r.payment_status === 'refunded' ? 'account.status_refunded' : 'account.status_pending';
+    const date = new Date(r.created_at).toLocaleDateString();
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.race_year}</td>
+      <td>${r.race_category === 'road' ? '🛣️ Road' : '🏔️ Mountain'}</td>
+      <td><span class="badge ${badgeClass}" data-i18n="${statusKey}">${t(statusKey)}</span></td>
+      <td>${date}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+});
+</script>
+</body>
+</html>

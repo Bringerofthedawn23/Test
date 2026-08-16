@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gallery — Vasiliki Race</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    .lightbox {
+      display: none; position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.92); align-items: center; justify-content: center;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img { max-width: 90vw; max-height: 85vh; border-radius: 8px; object-fit: contain; }
+    .lightbox-close {
+      position: absolute; top: 1.5rem; right: 1.5rem;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(255,255,255,0.1); border: none; cursor: pointer;
+      color: #fff; font-size: 1.4rem; display: flex; align-items: center; justify-content: center;
+    }
+    .lightbox-nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(255,255,255,0.1); border: none; cursor: pointer;
+      color: #fff; font-size: 1.5rem; display: flex; align-items: center; justify-content: center;
+      transition: background var(--transition);
+    }
+    .lightbox-nav:hover { background: rgba(255,107,53,0.4); }
+    .lightbox-prev { left: 1.5rem; }
+    .lightbox-next { right: 1.5rem; }
+    .gallery-placeholder { background: linear-gradient(135deg, var(--bg-card-2), var(--bg)); border: 1px dashed var(--border); border-radius: var(--r); min-height: 220px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:0.5rem; padding:1.5rem; text-align:center; }
+  </style>
+</head>
+<body>
+
+<nav class="nav scrolled">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <span class="logo-main">Vasiliki Race</span>
+      <span class="logo-sub">Lefkada · Greece</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html"    data-i18n="nav.home">Home</a></li>
+      <li><a href="about.html"   data-i18n="nav.about">About</a></li>
+      <li><a href="routes.html"  data-i18n="nav.routes">Routes</a></li>
+      <li><a href="register.html" data-i18n="nav.register">Register</a></li>
+      <li><a href="gallery.html" class="active" data-i18n="nav.gallery">Gallery</a></li>
+      <li><a href="contact.html" data-i18n="nav.contact">Contact</a></li>
+    </ul>
+    <div class="nav-actions">
+      <div class="lang-toggle"><button data-lang="en">EN</button><button data-lang="el">ΕΛ</button></div>
+      <a href="login.html" id="nav-login" class="btn btn-outline btn-sm" data-i18n="nav.login">Login</a>
+      <a href="my-account.html" id="nav-account" class="btn btn-outline btn-sm hidden" data-i18n="nav.account">My Account</a>
+      <a href="register.html" class="btn btn-primary btn-sm" data-i18n="nav.register">Register</a>
+    </div>
+    <button class="nav-hamburger"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="nav-mobile">
+  <a href="index.html" data-i18n="nav.home">Home</a>
+  <a href="about.html" data-i18n="nav.about">About</a>
+  <a href="routes.html" data-i18n="nav.routes">Routes</a>
+  <a href="register.html" data-i18n="nav.register">Register</a>
+  <a href="gallery.html" data-i18n="nav.gallery">Gallery</a>
+  <a href="contact.html" data-i18n="nav.contact">Contact</a>
+</div>
+
+<div style="padding:calc(var(--nav-h) + 4rem) 1.5rem 2rem;background:linear-gradient(to bottom,#0D1B2A,var(--bg))">
+  <div class="container">
+    <div class="section-label reveal" data-i18n="gallery.label">Photo Gallery</div>
+    <h1 class="section-title reveal" data-i18n="gallery.title">Race Moments</h1>
+    <p class="section-desc reveal" data-i18n="gallery.desc">Photos from past editions of the Vasiliki Road & Mountain Race.</p>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+
+    <!-- Gallery grid — images from assets/images/gallery/ -->
+    <div class="gallery-grid" id="gallery-grid">
+      <!-- Placeholder items — replace with real images -->
+      <div class="gallery-placeholder reveal">
+        <span style="font-size:2.5rem">📸</span>
+        <p style="font-size:0.85rem;color:var(--text-muted)" data-i18n="gallery.upload_hint">Photos from past races will be added here.</p>
+      </div>
+    </div>
+
+    <div class="card reveal" style="border-color:rgba(0,180,216,0.25);margin-top:3rem;text-align:center">
+      <p style="font-size:0.9rem;color:var(--text-muted)">
+        📷 <strong style="color:var(--text)">Your photos will appear here.</strong>
+        Drag and drop your race photos into <code>assets/images/gallery/</code> and they will automatically show in the grid.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lb-close">✕</button>
+  <button class="lightbox-nav lightbox-prev" id="lb-prev">‹</button>
+  <img id="lb-img" src="" alt="">
+  <button class="lightbox-nav lightbox-next" id="lb-next">›</button>
+</div>
+
+<footer class="footer">
+  <div class="footer-grid">
+    <div><div class="footer-logo">Vasiliki Race</div><p class="footer-desc" data-i18n="footer.desc"></p><div class="footer-social"><a href="https://www.facebook.com/share/g/19JeD5B72P/" target="_blank" rel="noopener">📘</a></div></div>
+    <div class="footer-col"><h4 data-i18n="footer.links_race">Race</h4><a href="about.html" data-i18n="footer.about">About</a><a href="routes.html" data-i18n="footer.routes">Routes</a><a href="gallery.html" data-i18n="footer.gallery">Gallery</a></div>
+    <div class="footer-col"><h4 data-i18n="footer.links_info">Info</h4><a href="register.html" data-i18n="footer.register">Register</a><a href="contact.html" data-i18n="footer.contact">Contact</a></div>
+    <div class="footer-col"><h4 data-i18n="footer.links_social">Follow</h4><a href="https://www.facebook.com/share/g/19JeD5B72P/" target="_blank" data-i18n="footer.facebook">Facebook Group</a></div>
+  </div>
+  <div class="footer-bottom"><span class="footer-copy" data-i18n="footer.copy"></span><div class="lang-toggle"><button data-lang="en">EN</button><button data-lang="el">ΕΛ</button></div></div>
+</footer>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/i18n.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+/* Dynamically load images from assets/images/gallery/ list */
+const GALLERY_IMAGES = [
+  /* Add your image filenames here once you drop them in assets/images/gallery/
+     Example: 'assets/images/gallery/race-2024-01.jpg',
+  */
+];
+
+const grid = document.getElementById('gallery-grid');
+let currentIdx = 0;
+
+if (GALLERY_IMAGES.length) {
+  grid.innerHTML = '';
+  GALLERY_IMAGES.forEach((src, i) => {
+    const item = document.createElement('div');
+    item.className = 'gallery-item reveal';
+    item.innerHTML = `<img src="${src}" alt="Race photo ${i+1}" loading="lazy"><div class="gallery-overlay">🔍</div>`;
+    item.addEventListener('click', () => openLightbox(i));
+    grid.appendChild(item);
+  });
+}
+
+function openLightbox(i) {
+  currentIdx = i;
+  document.getElementById('lb-img').src = GALLERY_IMAGES[i];
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('lb-close').addEventListener('click', closeLightbox);
+document.getElementById('lb-prev').addEventListener('click', () => openLightbox((currentIdx - 1 + GALLERY_IMAGES.length) % GALLERY_IMAGES.length));
+document.getElementById('lb-next').addEventListener('click', () => openLightbox((currentIdx + 1) % GALLERY_IMAGES.length));
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') document.getElementById('lb-prev').click();
+  if (e.key === 'ArrowRight') document.getElementById('lb-next').click();
+});
+</script>
+</body>
+</html>

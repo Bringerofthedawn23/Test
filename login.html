@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — Vasiliki Race</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<nav class="nav scrolled">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <span class="logo-main">Vasiliki Race</span>
+      <span class="logo-sub">Lefkada · Greece</span>
+    </a>
+    <div class="nav-actions">
+      <div class="lang-toggle">
+        <button data-lang="en">EN</button>
+        <button data-lang="el">ΕΛ</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main class="auth-page">
+  <div id="login-box" class="auth-box">
+    <h1 class="auth-title" data-i18n="login.title">Welcome Back</h1>
+    <p class="auth-subtitle" data-i18n="login.subtitle">Sign in to your account</p>
+
+    <div class="alert alert-error" id="login-error"></div>
+    <div class="alert alert-success" id="login-success"></div>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label class="form-label" data-i18n="login.email">Email Address</label>
+        <input type="email" class="form-control" id="login-email" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="login.password">Password</label>
+        <input type="password" class="form-control" id="login-password" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn btn-primary btn-full mt-2" data-i18n="login.btn">Sign In</button>
+    </form>
+
+    <p style="text-align:right;margin-top:0.75rem">
+      <a href="#" id="forgot-link" style="font-size:0.82rem;color:var(--text-muted)" data-i18n="login.forgot">Forgot password?</a>
+    </p>
+
+    <div class="auth-divider"><span data-i18n="login.or">or</span></div>
+
+    <p class="auth-footer">
+      <span data-i18n="login.no_account">Don't have an account?</span>
+      <a href="#" id="switch-to-signup" data-i18n="login.signup"> Create one</a>
+    </p>
+  </div>
+
+  <!-- SIGNUP BOX (toggled) -->
+  <div id="signup-box" class="auth-box" style="display:none">
+    <h1 class="auth-title" data-i18n="signup.title">Create Account</h1>
+    <p class="auth-subtitle" data-i18n="signup.subtitle">Join the Vasiliki Race community</p>
+
+    <div class="alert alert-error"   id="signup-error"></div>
+    <div class="alert alert-success" id="signup-success"></div>
+
+    <form id="signup-form">
+      <div class="form-group">
+        <label class="form-label" data-i18n="signup.name">Full Name</label>
+        <input type="text" class="form-control" id="signup-name" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="signup.email">Email Address</label>
+        <input type="email" class="form-control" id="signup-email" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="signup.password">Password</label>
+        <input type="password" class="form-control" id="signup-password" required minlength="8" autocomplete="new-password">
+        <div class="form-hint">Minimum 8 characters</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="signup.confirm">Confirm Password</label>
+        <input type="password" class="form-control" id="signup-confirm" required autocomplete="new-password">
+      </div>
+      <button type="submit" class="btn btn-primary btn-full mt-2" data-i18n="signup.btn">Create Account</button>
+    </form>
+
+    <p class="auth-footer">
+      <span data-i18n="signup.have_account">Already have an account?</span>
+      <a href="#" id="switch-to-login" data-i18n="signup.login"> Sign in</a>
+    </p>
+  </div>
+
+  <!-- FORGOT PASSWORD BOX -->
+  <div id="forgot-box" class="auth-box" style="display:none">
+    <h1 class="auth-title">Reset Password</h1>
+    <p class="auth-subtitle">Enter your email and we'll send a reset link.</p>
+    <div class="alert alert-error"   id="forgot-error"></div>
+    <div class="alert alert-success" id="forgot-success"></div>
+    <form id="forgot-form">
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" class="form-control" id="forgot-email" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full mt-2">Send Reset Link</button>
+    </form>
+    <p class="auth-footer"><a href="#" id="back-to-login">← Back to login</a></p>
+  </div>
+</main>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/i18n.js"></script>
+<!-- Supabase CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  // Redirect if already logged in
+  const user = await getUser();
+  if (user) { window.location.href = 'my-account.html'; return; }
+
+  const loginBox  = document.getElementById('login-box');
+  const signupBox = document.getElementById('signup-box');
+  const forgotBox = document.getElementById('forgot-box');
+
+  function showBox(box) {
+    [loginBox, signupBox, forgotBox].forEach(b => b.style.display = 'none');
+    box.style.display = 'block';
+  }
+
+  document.getElementById('switch-to-signup').addEventListener('click', e => { e.preventDefault(); showBox(signupBox); });
+  document.getElementById('switch-to-login').addEventListener('click',  e => { e.preventDefault(); showBox(loginBox); });
+  document.getElementById('forgot-link').addEventListener('click',      e => { e.preventDefault(); showBox(forgotBox); });
+  document.getElementById('back-to-login').addEventListener('click',    e => { e.preventDefault(); showBox(loginBox); });
+
+  // Login
+  document.getElementById('login-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn   = e.target.querySelector('button[type=submit]');
+    const errEl = document.getElementById('login-error');
+    btn.disabled = true; btn.textContent = '...';
+    errEl.classList.remove('show');
+    const { error } = await signIn(
+      document.getElementById('login-email').value,
+      document.getElementById('login-password').value
+    );
+    if (error) {
+      errEl.textContent = error.message; errEl.classList.add('show');
+      btn.disabled = false; btn.textContent = 'Sign In';
+    } else {
+      const redirect = new URLSearchParams(location.search).get('redirect') || 'my-account.html';
+      window.location.href = redirect;
+    }
+  });
+
+  // Signup
+  document.getElementById('signup-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn   = e.target.querySelector('button[type=submit]');
+    const errEl = document.getElementById('signup-error');
+    const sucEl = document.getElementById('signup-success');
+    const pass  = document.getElementById('signup-password').value;
+    const conf  = document.getElementById('signup-confirm').value;
+    errEl.classList.remove('show'); sucEl.classList.remove('show');
+    if (pass !== conf) { errEl.textContent = 'Passwords do not match.'; errEl.classList.add('show'); return; }
+    btn.disabled = true; btn.textContent = '...';
+    const { error } = await signUp(
+      document.getElementById('signup-name').value,
+      document.getElementById('signup-email').value,
+      pass
+    );
+    if (error) {
+      errEl.textContent = error.message; errEl.classList.add('show');
+      btn.disabled = false; btn.textContent = 'Create Account';
+    } else {
+      sucEl.textContent = 'Account created! Please check your email to verify your address.';
+      sucEl.classList.add('show');
+      e.target.reset();
+      btn.disabled = false; btn.textContent = 'Create Account';
+    }
+  });
+
+  // Forgot password
+  document.getElementById('forgot-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn   = e.target.querySelector('button[type=submit]');
+    const errEl = document.getElementById('forgot-error');
+    const sucEl = document.getElementById('forgot-success');
+    errEl.classList.remove('show'); sucEl.classList.remove('show');
+    btn.disabled = true; btn.textContent = '...';
+    const { error } = await resetPassword(document.getElementById('forgot-email').value);
+    btn.disabled = false; btn.textContent = 'Send Reset Link';
+    if (error) { errEl.textContent = error.message; errEl.classList.add('show'); }
+    else { sucEl.textContent = 'Reset link sent! Check your email.'; sucEl.classList.add('show'); }
+  });
+
+  // Pre-select signup if ?mode=signup
+  if (new URLSearchParams(location.search).get('mode') === 'signup') showBox(signupBox);
+});
+</script>
+</body>
+</html>

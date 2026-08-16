@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Vasiliki Race</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    .admin-page { padding: calc(var(--nav-h) + 2rem) 1.5rem 4rem; min-height: 100vh; }
+    .admin-stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r); padding: 1.25rem; }
+    .admin-stat .num { font-family: var(--font-h); font-size: 2.5rem; font-weight: 700; color: var(--accent); }
+    .admin-stat .lbl { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-top: 0.25rem; }
+    .filter-bar { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem; align-items: center; }
+    .filter-bar select, .filter-bar input { padding: 0.5rem 0.85rem; background: var(--bg-card-2); border: 1.5px solid var(--border); border-radius: var(--r); color: var(--text); font-size: 0.88rem; }
+    .status-select { padding: 0.25rem 0.5rem; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-size: 0.8rem; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<nav class="nav scrolled">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <span class="logo-main">Vasiliki Race</span>
+      <span class="logo-sub">Admin Panel</span>
+    </a>
+    <div class="nav-actions">
+      <button id="nav-logout-btn" class="btn btn-outline btn-sm">Sign Out</button>
+    </div>
+  </div>
+</nav>
+
+<main class="admin-page">
+  <div class="container">
+
+    <div id="admin-guard" style="display:none" class="card" style="text-align:center;padding:3rem">
+      <h2 style="font-family:var(--font-h);margin-bottom:0.75rem">Access Denied</h2>
+      <p style="color:var(--text-muted)">You must be signed in as an administrator to view this page.</p>
+      <a href="login.html" class="btn btn-primary" style="margin-top:1.5rem">Sign In</a>
+    </div>
+
+    <div id="admin-content">
+      <div style="margin-bottom:2rem">
+        <div class="section-label">Admin Panel</div>
+        <h1 style="font-family:var(--font-h);font-size:2rem;text-transform:uppercase;letter-spacing:0.04em">Registrations</h1>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid-4" style="margin-bottom:2rem" id="admin-stats">
+        <div class="admin-stat"><div class="num" id="stat-total">—</div><div class="lbl">Total</div></div>
+        <div class="admin-stat"><div class="num" id="stat-paid" style="color:var(--green)">—</div><div class="lbl">Paid</div></div>
+        <div class="admin-stat"><div class="num" id="stat-pending" style="color:#FFC107">—</div><div class="lbl">Pending</div></div>
+        <div class="admin-stat"><div class="num" id="stat-road">—</div><div class="lbl">Road</div></div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-bar">
+        <select id="filter-status">
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="paid">Paid</option>
+          <option value="refunded">Refunded</option>
+        </select>
+        <select id="filter-cat">
+          <option value="">All Categories</option>
+          <option value="road">Road Race</option>
+          <option value="mountain">Mountain Race</option>
+        </select>
+        <input type="text" id="filter-search" placeholder="Search by name or email…" style="flex:1;min-width:200px">
+        <button class="btn btn-outline btn-sm" id="btn-export">Export CSV</button>
+      </div>
+
+      <!-- Table -->
+      <div style="overflow-x:auto;border-radius:var(--r-lg);border:1px solid var(--border)">
+        <table class="reg-table" id="admin-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Category</th>
+              <th>T-Shirt</th>
+              <th>Registered</th>
+              <th>Payment</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="admin-tbody">
+            <tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/i18n.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+let allRegs = [];
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const user = await getUser();
+  if (!user || user.email !== CONFIG.ADMIN_EMAIL) {
+    document.getElementById('admin-content').style.display = 'none';
+    document.getElementById('admin-guard').style.display = 'block';
+    return;
+  }
+
+  allRegs = await getAllRegistrations();
+  renderStats(allRegs);
+  renderTable(allRegs);
+
+  document.getElementById('filter-status').addEventListener('change', applyFilters);
+  document.getElementById('filter-cat').addEventListener('change', applyFilters);
+  document.getElementById('filter-search').addEventListener('input', applyFilters);
+  document.getElementById('btn-export').addEventListener('click', exportCSV);
+});
+
+function applyFilters() {
+  const status = document.getElementById('filter-status').value;
+  const cat    = document.getElementById('filter-cat').value;
+  const search = document.getElementById('filter-search').value.toLowerCase();
+  const filtered = allRegs.filter(r =>
+    (!status || r.payment_status === status) &&
+    (!cat    || r.race_category  === cat) &&
+    (!search || r.full_name?.toLowerCase().includes(search) || r.email?.toLowerCase().includes(search))
+  );
+  renderTable(filtered);
+}
+
+function renderStats(regs) {
+  document.getElementById('stat-total').textContent   = regs.length;
+  document.getElementById('stat-paid').textContent    = regs.filter(r => r.payment_status === 'paid').length;
+  document.getElementById('stat-pending').textContent = regs.filter(r => r.payment_status === 'pending').length;
+  document.getElementById('stat-road').textContent    = regs.filter(r => r.race_category  === 'road').length;
+}
+
+function renderTable(regs) {
+  const tbody = document.getElementById('admin-tbody');
+  if (!regs.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem">No registrations found</td></tr>';
+    return;
+  }
+  tbody.innerHTML = regs.map(r => {
+    const badgeClass = r.payment_status === 'paid' ? 'badge-paid' : r.payment_status === 'refunded' ? 'badge-refunded' : 'badge-pending';
+    const date = new Date(r.created_at).toLocaleDateString('el-GR');
+    return `<tr>
+      <td><strong>${r.full_name}</strong></td>
+      <td style="font-size:0.83rem">${r.email}</td>
+      <td style="font-size:0.83rem">${r.phone || '—'}</td>
+      <td>${r.race_category === 'road' ? '🛣️ Road' : '🏔️ Mountain'}</td>
+      <td>${r.tshirt_size || '—'}</td>
+      <td style="font-size:0.83rem;color:var(--text-muted)">${date}</td>
+      <td><span class="badge ${badgeClass}">${r.payment_status}</span></td>
+      <td>
+        <select class="status-select" data-id="${r.id}" onchange="changeStatus(this)">
+          <option value="pending"  ${r.payment_status==='pending'  ? 'selected':''}>Pending</option>
+          <option value="paid"     ${r.payment_status==='paid'     ? 'selected':''}>Paid</option>
+          <option value="refunded" ${r.payment_status==='refunded' ? 'selected':''}>Refunded</option>
+          <option value="cancelled"${r.payment_status==='cancelled'? 'selected':''}>Cancelled</option>
+        </select>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function changeStatus(select) {
+  const id     = select.dataset.id;
+  const status = select.value;
+  const { error } = await updatePaymentStatus(id, status);
+  if (error) { alert('Error: ' + error.message); return; }
+  const reg = allRegs.find(r => r.id === id);
+  if (reg) reg.payment_status = status;
+  renderStats(allRegs);
+}
+
+function exportCSV() {
+  const rows = [['Name','Email','Phone','DOB','Gender','T-Shirt','Category','EC Name','EC Phone','Status','Date']];
+  allRegs.forEach(r => rows.push([
+    r.full_name, r.email, r.phone, r.date_of_birth, r.gender, r.tshirt_size,
+    r.race_category, r.emergency_contact_name, r.emergency_contact_phone,
+    r.payment_status, new Date(r.created_at).toLocaleDateString()
+  ]));
+  const csv  = rows.map(r => r.map(c => `"${String(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a'); a.href = url; a.download = 'vasiliki-race-registrations.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

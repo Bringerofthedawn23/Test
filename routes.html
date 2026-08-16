@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Routes — Vasiliki Race</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <!-- Leaflet for interactive GPX map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    .route-tabs { display: flex; gap: 0.5rem; margin-bottom: 2rem; }
+    .route-tab {
+      padding: 0.65rem 1.5rem; border-radius: 8px; cursor: pointer;
+      font-family: var(--font-h); font-size: 0.85rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      border: 1.5px solid var(--border); color: var(--text-muted); background: transparent;
+      transition: all var(--transition);
+    }
+    .route-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .route-section { display: none; }
+    .route-section.active { display: block; }
+    #map-road, #map-mtn { height: 450px; border-radius: var(--r-lg); border: 1px solid var(--border); }
+    .map-placeholder-inner {
+      height: 450px; background: var(--bg-card-2); border-radius: var(--r-lg);
+      border: 1px solid var(--border); display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 1rem; padding: 2rem; text-align: center;
+    }
+    .map-placeholder-inner .icon { font-size: 3rem; }
+    .elevation-bar {
+      height: 120px; background: var(--bg-card); border-radius: var(--r);
+      border: 1px solid var(--border); margin-top: 1rem;
+      display: flex; align-items: flex-end; padding: 1rem 1.5rem; gap: 2px;
+      position: relative; overflow: hidden;
+    }
+    .elevation-bar::before {
+      content: 'Elevation Profile'; position: absolute; top: 0.75rem; left: 1rem;
+      font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted);
+    }
+    .elev-col {
+      flex: 1; background: rgba(255,107,53,0.25); border-radius: 2px 2px 0 0; min-height: 4px;
+      transition: background var(--transition);
+    }
+    .elev-col:hover { background: rgba(255,107,53,0.6); }
+  </style>
+</head>
+<body>
+
+<nav class="nav scrolled">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <span class="logo-main">Vasiliki Race</span>
+      <span class="logo-sub">Lefkada · Greece</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html"    data-i18n="nav.home">Home</a></li>
+      <li><a href="about.html"   data-i18n="nav.about">About</a></li>
+      <li><a href="routes.html"  class="active" data-i18n="nav.routes">Routes</a></li>
+      <li><a href="register.html" data-i18n="nav.register">Register</a></li>
+      <li><a href="gallery.html" data-i18n="nav.gallery">Gallery</a></li>
+      <li><a href="contact.html" data-i18n="nav.contact">Contact</a></li>
+    </ul>
+    <div class="nav-actions">
+      <div class="lang-toggle"><button data-lang="en">EN</button><button data-lang="el">ΕΛ</button></div>
+      <a href="login.html" id="nav-login" class="btn btn-outline btn-sm" data-i18n="nav.login">Login</a>
+      <a href="my-account.html" id="nav-account" class="btn btn-outline btn-sm hidden" data-i18n="nav.account">My Account</a>
+      <a href="register.html" class="btn btn-primary btn-sm" data-i18n="nav.register">Register</a>
+    </div>
+    <button class="nav-hamburger"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="nav-mobile">
+  <a href="index.html" data-i18n="nav.home">Home</a>
+  <a href="about.html" data-i18n="nav.about">About</a>
+  <a href="routes.html" data-i18n="nav.routes">Routes</a>
+  <a href="register.html" data-i18n="nav.register">Register</a>
+  <a href="gallery.html" data-i18n="nav.gallery">Gallery</a>
+  <a href="contact.html" data-i18n="nav.contact">Contact</a>
+</div>
+
+<!-- PAGE HERO -->
+<div style="padding:calc(var(--nav-h) + 4rem) 1.5rem 2rem;background:linear-gradient(to bottom,#0D1B2A,var(--bg))">
+  <div class="container">
+    <div class="section-label reveal" data-i18n="routes.label">Race Routes</div>
+    <h1 class="section-title reveal" data-i18n="routes.title">The Courses</h1>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+
+    <!-- Tab selector -->
+    <div class="route-tabs">
+      <button class="route-tab active" onclick="showRoute('road', this)" data-i18n="routes.map_road">Road Race Map</button>
+      <button class="route-tab" onclick="showRoute('mtn', this)" data-i18n="routes.map_mtn">Mountain Race Map</button>
+    </div>
+
+    <!-- ROAD ROUTE -->
+    <div class="route-section active" id="route-road">
+      <div class="grid-2" style="align-items:start;gap:3rem;margin-bottom:2rem">
+        <div>
+          <h2 style="font-family:var(--font-h);font-size:1.8rem;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:0.75rem" data-i18n="routes.road_title">Road Race Route</h2>
+          <p style="color:var(--text-muted);line-height:1.8;margin-bottom:1.5rem" data-i18n="routes.road_desc">Starting and finishing in Vasiliki village, the road race follows the coastal and village roads through some of the most scenic parts of Lefkada.</p>
+          <div class="route-info">
+            <div class="route-stat">
+              <div class="rv" data-i18n="categories.road_dist">TBD km</div>
+              <div class="rl" data-i18n="routes.dist">Distance</div>
+            </div>
+            <div class="route-stat">
+              <div class="rv" data-i18n="categories.road_elev">TBD m</div>
+              <div class="rl" data-i18n="routes.elev">Elevation</div>
+            </div>
+            <div class="route-stat">
+              <div class="rv">Road</div>
+              <div class="rl" data-i18n="routes.type">Terrain</div>
+            </div>
+          </div>
+          <div style="margin-top:1.5rem">
+            <a href="register.html?cat=road" class="btn btn-primary" data-i18n="categories.road_btn">Register for Road</a>
+          </div>
+        </div>
+        <div>
+          <div id="map-road-container">
+            <div class="map-placeholder-inner" id="map-road-placeholder">
+              <div class="icon">🗺️</div>
+              <h3 style="font-family:var(--font-h);font-size:1.1rem;text-transform:uppercase">Route Map Coming Soon</h3>
+              <p style="color:var(--text-muted);font-size:0.88rem" data-i18n="routes.gpx_hint">GPX download will be available before race day.</p>
+            </div>
+            <div id="map-road" style="display:none"></div>
+          </div>
+          <!-- Decorative elevation placeholder -->
+          <div class="elevation-bar" id="elev-road">
+            <div class="elev-col" style="height:30%"></div><div class="elev-col" style="height:35%"></div>
+            <div class="elev-col" style="height:42%"></div><div class="elev-col" style="height:50%"></div>
+            <div class="elev-col" style="height:55%"></div><div class="elev-col" style="height:60%"></div>
+            <div class="elev-col" style="height:65%"></div><div class="elev-col" style="height:58%"></div>
+            <div class="elev-col" style="height:62%"></div><div class="elev-col" style="height:55%"></div>
+            <div class="elev-col" style="height:45%"></div><div class="elev-col" style="height:38%"></div>
+            <div class="elev-col" style="height:30%"></div><div class="elev-col" style="height:25%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOUNTAIN ROUTE -->
+    <div class="route-section" id="route-mtn">
+      <div class="grid-2" style="align-items:start;gap:3rem;margin-bottom:2rem">
+        <div>
+          <h2 style="font-family:var(--font-h);font-size:1.8rem;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:0.75rem" data-i18n="routes.mtn_title">Mountain Race Route</h2>
+          <p style="color:var(--text-muted);line-height:1.8;margin-bottom:1.5rem" data-i18n="routes.mtn_desc">A challenging trail ascent from the village up into the hills, with panoramic views of the Ionian Sea and a fast descent to the finish line.</p>
+          <div class="route-info">
+            <div class="route-stat">
+              <div class="rv" data-i18n="categories.mtn_dist">TBD km</div>
+              <div class="rl" data-i18n="routes.dist">Distance</div>
+            </div>
+            <div class="route-stat">
+              <div class="rv" data-i18n="categories.mtn_elev">TBD m</div>
+              <div class="rl" data-i18n="routes.elev">Elevation</div>
+            </div>
+            <div class="route-stat">
+              <div class="rv">Trail</div>
+              <div class="rl" data-i18n="routes.type">Terrain</div>
+            </div>
+          </div>
+          <div style="margin-top:1.5rem">
+            <a href="register.html?cat=mountain" class="btn btn-primary" data-i18n="categories.mtn_btn">Register for Mountain</a>
+          </div>
+        </div>
+        <div>
+          <div class="map-placeholder-inner" id="map-mtn-placeholder">
+            <div class="icon">🏔️</div>
+            <h3 style="font-family:var(--font-h);font-size:1.1rem;text-transform:uppercase">Route Map Coming Soon</h3>
+            <p style="color:var(--text-muted);font-size:0.88rem" data-i18n="routes.gpx_hint">GPX download will be available before race day.</p>
+          </div>
+          <div id="map-mtn" style="display:none"></div>
+          <!-- Decorative elevation placeholder — more aggressive for mountain -->
+          <div class="elevation-bar" id="elev-mtn">
+            <div class="elev-col" style="height:20%"></div><div class="elev-col" style="height:35%"></div>
+            <div class="elev-col" style="height:55%"></div><div class="elev-col" style="height:70%"></div>
+            <div class="elev-col" style="height:80%"></div><div class="elev-col" style="height:88%"></div>
+            <div class="elev-col" style="height:92%"></div><div class="elev-col" style="height:95%"></div>
+            <div class="elev-col" style="height:100%"></div><div class="elev-col" style="height:90%"></div>
+            <div class="elev-col" style="height:70%"></div><div class="elev-col" style="height:45%"></div>
+            <div class="elev-col" style="height:30%"></div><div class="elev-col" style="height:18%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GPX upload note -->
+    <div class="card reveal" style="border-color:rgba(0,180,216,0.25);margin-top:2rem">
+      <p style="font-size:0.88rem;color:var(--text-muted)">
+        📍 <strong style="color:var(--text)">Route maps will be shown here.</strong>
+        Once GPX files are provided, an interactive map with the exact race route and elevation profile will appear above.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div>
+      <div class="footer-logo">Vasiliki Race</div>
+      <p class="footer-desc" data-i18n="footer.desc"></p>
+      <div class="footer-social">
+        <a href="https://www.facebook.com/share/g/19JeD5B72P/" target="_blank" rel="noopener">📘</a>
+      </div>
+    </div>
+    <div class="footer-col"><h4 data-i18n="footer.links_race">Race</h4><a href="about.html" data-i18n="footer.about">About</a><a href="routes.html" data-i18n="footer.routes">Routes</a><a href="gallery.html" data-i18n="footer.gallery">Gallery</a></div>
+    <div class="footer-col"><h4 data-i18n="footer.links_info">Info</h4><a href="register.html" data-i18n="footer.register">Register</a><a href="contact.html" data-i18n="footer.contact">Contact</a></div>
+    <div class="footer-col"><h4 data-i18n="footer.links_social">Follow</h4><a href="https://www.facebook.com/share/g/19JeD5B72P/" target="_blank" data-i18n="footer.facebook">Facebook Group</a></div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy" data-i18n="footer.copy"></span>
+    <div class="lang-toggle"><button data-lang="en">EN</button><button data-lang="el">ΕΛ</button></div>
+  </div>
+</footer>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/i18n.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+function showRoute(which, btn) {
+  document.querySelectorAll('.route-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.route-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('route-' + which).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* Load a GPX file onto a Leaflet map */
+function loadGPX(gpxText, mapId, placeholderId) {
+  const placeholder = document.getElementById(placeholderId);
+  const mapEl = document.getElementById(mapId);
+  placeholder.style.display = 'none';
+  mapEl.style.display = 'block';
+
+  const map = L.map(mapId);
+  L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenTopoMap contributors', maxZoom: 17
+  }).addTo(map);
+
+  // Parse GPX and draw polyline
+  const parser = new DOMParser();
+  const gpx = parser.parseFromString(gpxText, 'text/xml');
+  const pts = [...gpx.querySelectorAll('trkpt')].map(p => [
+    parseFloat(p.getAttribute('lat')), parseFloat(p.getAttribute('lon'))
+  ]);
+  if (pts.length) {
+    const poly = L.polyline(pts, { color: '#FF6B35', weight: 4, opacity: 0.9 }).addTo(map);
+    map.fitBounds(poly.getBounds(), { padding: [40, 40] });
+    L.marker(pts[0], { title: 'Start' }).addTo(map).bindPopup('🏁 Start');
+    L.marker(pts[pts.length - 1], { title: 'Finish' }).addTo(map).bindPopup('🏆 Finish');
+  }
+}
+
+/* Drag-and-drop GPX support (admin convenience) */
+['map-road-placeholder','map-mtn-placeholder'].forEach((pid, i) => {
+  const el = document.getElementById(pid);
+  if (!el) return;
+  el.addEventListener('dragover', e => e.preventDefault());
+  el.addEventListener('drop', e => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (!file || !file.name.endsWith('.gpx')) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const mapId = i === 0 ? 'map-road' : 'map-mtn';
+      loadGPX(ev.target.result, mapId, pid);
+    };
+    reader.readAsText(file);
+  });
+});
+</script>
+</body>
+</html>

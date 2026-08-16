@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register — Vasiliki Race</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    .register-page { padding: calc(var(--nav-h) + 3rem) 1.5rem 4rem; min-height: 100vh; }
+    .register-wrap { max-width: 680px; margin: 0 auto; }
+    .cat-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
+    .cat-card {
+      border: 2px solid var(--border); border-radius: var(--r-lg); padding: 1.5rem;
+      cursor: pointer; transition: all var(--transition); text-align: center;
+      background: var(--bg-card);
+    }
+    .cat-card:hover { border-color: var(--accent); }
+    .cat-card.selected { border-color: var(--accent); background: rgba(255,107,53,0.08); }
+    .cat-card .cat-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .cat-card .cat-name { font-family: var(--font-h); font-size: 1.1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+    .cat-card .cat-meta { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.35rem; }
+    .step-panel { display: none; }
+    .step-panel.active { display: block; }
+    .price-display {
+      background: rgba(255,107,53,0.08); border: 1px solid var(--border-accent);
+      border-radius: var(--r); padding: 1.25rem 1.5rem;
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .price-label { font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+    .price-value { font-family: var(--font-h); font-size: 1.8rem; font-weight: 700; color: var(--accent); }
+    .form-section-title { font-family: var(--font-h); font-size: 1rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin: 1.75rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+
+<nav class="nav scrolled">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <span class="logo-main">Vasiliki Race</span>
+      <span class="logo-sub">Lefkada · Greece</span>
+    </a>
+    <div class="nav-actions">
+      <div class="lang-toggle">
+        <button data-lang="en">EN</button>
+        <button data-lang="el">ΕΛ</button>
+      </div>
+      <a href="login.html" id="nav-login" class="btn btn-outline btn-sm" data-i18n="nav.login">Login</a>
+      <a href="my-account.html" id="nav-account" class="btn btn-outline btn-sm hidden" data-i18n="nav.account">My Account</a>
+    </div>
+    <button class="nav-hamburger"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<main class="register-page">
+  <div class="register-wrap">
+    <div class="section-header" style="margin-bottom:2rem">
+      <div class="section-label" data-i18n="register.label">Registration</div>
+      <h1 class="section-title" data-i18n="register.title">Register for the Race</h1>
+    </div>
+
+    <!-- NOT LOGGED IN WARNING -->
+    <div id="not-logged-in" class="alert alert-error" style="display:none">
+      You need to be logged in to register.
+      <a href="login.html?redirect=register.html" style="color:#FF9999;text-decoration:underline;margin-left:0.5rem">Sign in or create an account</a>
+    </div>
+
+    <!-- STEPS -->
+    <div class="steps" id="steps-indicator">
+      <div class="step active" id="step-ind-1">
+        <div class="step-num">1</div>
+        <div class="step-label" data-i18n="register.step1">Account</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" id="step-ind-2">
+        <div class="step-num">2</div>
+        <div class="step-label" data-i18n="register.step2">Details</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" id="step-ind-3">
+        <div class="step-num">3</div>
+        <div class="step-label" data-i18n="register.step3">Payment</div>
+      </div>
+    </div>
+
+    <div class="alert alert-error"   id="form-error"></div>
+    <div class="alert alert-success" id="form-success"></div>
+
+    <!-- STEP 1: Category + Account check -->
+    <div class="step-panel active" id="panel-1">
+      <h3 style="font-family:var(--font-h);margin-bottom:1.25rem;font-size:1rem;letter-spacing:0.06em;text-transform:uppercase" data-i18n="register.cat_label">Select Race Category</h3>
+      <div class="cat-selector">
+        <div class="cat-card selected" data-cat="road" onclick="selectCat('road', this)">
+          <div class="cat-icon">🛣️</div>
+          <div class="cat-name" data-i18n="categories.road_title">Road Race</div>
+          <div class="cat-meta">
+            <span data-i18n="categories.road_dist">TBD km</span> ·
+            <span data-i18n="categories.road_diff">Moderate</span>
+          </div>
+        </div>
+        <div class="cat-card" data-cat="mountain" onclick="selectCat('mountain', this)">
+          <div class="cat-icon">🏔️</div>
+          <div class="cat-name" data-i18n="categories.mtn_title">Mountain Race</div>
+          <div class="cat-meta">
+            <span data-i18n="categories.mtn_dist">TBD km</span> ·
+            <span data-i18n="categories.mtn_diff">Challenging</span>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" id="btn-to-step2" data-i18n="register.next">Continue</button>
+    </div>
+
+    <!-- STEP 2: Participant details -->
+    <div class="step-panel" id="panel-2">
+      <form id="registration-form">
+
+        <div class="form-section-title">Personal Information</div>
+        <div class="form-group">
+          <label class="form-label"><span data-i18n="register.fname">Full Name</span> <span class="req">*</span></label>
+          <input type="text" class="form-control" id="r-name" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label"><span data-i18n="register.email">Email</span> <span class="req">*</span></label>
+            <input type="email" class="form-control" id="r-email" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span data-i18n="register.phone">Phone</span> <span class="req">*</span></label>
+            <input type="tel" class="form-control" id="r-phone" required placeholder="+30 xxx xxx xxxx">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label"><span data-i18n="register.dob">Date of Birth</span> <span class="req">*</span></label>
+            <input type="date" class="form-control" id="r-dob" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span data-i18n="register.gender">Gender</span> <span class="req">*</span></label>
+            <select class="form-control" id="r-gender" required>
+              <option value="">— Select —</option>
+              <option value="male"   data-i18n="register.gender_m">Male</option>
+              <option value="female" data-i18n="register.gender_f">Female</option>
+              <option value="other"  data-i18n="register.gender_o">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label"><span data-i18n="register.tshirt">T-Shirt Size</span> <span class="req">*</span></label>
+          <select class="form-control" id="r-tshirt" required>
+            <option value="">— Select —</option>
+            <option value="XS">XS</option>
+            <option value="S">S</option>
+            <option value="M">M</option>
+            <option value="L">L</option>
+            <option value="XL">XL</option>
+            <option value="XXL">XXL</option>
+          </select>
+        </div>
+
+        <div class="form-section-title">Emergency Contact</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label"><span data-i18n="register.ec_name">Emergency Contact Name</span> <span class="req">*</span></label>
+            <input type="text" class="form-control" id="r-ec-name" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span data-i18n="register.ec_phone">Emergency Contact Phone</span> <span class="req">*</span></label>
+            <input type="tel" class="form-control" id="r-ec-phone" required>
+          </div>
+        </div>
+
+        <div class="form-section-title">Declarations</div>
+        <div class="form-group">
+          <div class="form-check">
+            <input type="checkbox" id="r-medical" required>
+            <label for="r-medical" data-i18n="register.medical">I declare that I am in good physical health and fit to participate.</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="form-check">
+            <input type="checkbox" id="r-terms" required>
+            <label for="r-terms" data-i18n="register.terms">I accept the terms and conditions and race rules.</label>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <div style="display:flex;gap:1rem;margin-top:1.5rem">
+          <button type="button" class="btn btn-outline" id="btn-back-to-step1" data-i18n="register.back">Back</button>
+          <button type="submit" class="btn btn-primary" style="flex:1" data-i18n="register.next">Continue</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- STEP 3: Payment -->
+    <div class="step-panel" id="panel-3">
+      <div class="price-display">
+        <div>
+          <div class="price-label" data-i18n="register.price_label">Entry Fee</div>
+          <div style="font-size:0.82rem;color:var(--text-muted);margin-top:0.25rem">
+            Category: <strong id="payment-cat-display">—</strong>
+          </div>
+        </div>
+        <div class="price-value" id="price-display" data-i18n="register.price_tbd">TBD</div>
+      </div>
+
+      <div class="card" style="margin-bottom:1.5rem">
+        <h4 style="font-family:var(--font-h);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.04em">Registration Summary</h4>
+        <div style="font-size:0.88rem;color:var(--text-muted);line-height:2">
+          <div>Name: <strong id="sum-name">—</strong></div>
+          <div>Email: <strong id="sum-email">—</strong></div>
+          <div>Category: <strong id="sum-cat">—</strong></div>
+          <div>T-Shirt: <strong id="sum-tshirt">—</strong></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:1.5rem;border-color:rgba(0,180,216,0.3)">
+        <p style="font-size:0.88rem;color:var(--text-muted);line-height:1.7">
+          🔒 You will be redirected to Stripe's secure payment page. After payment, you'll receive a confirmation email. <strong>Refunds are processed manually</strong> — contact us if needed.
+        </p>
+      </div>
+
+      <div style="display:flex;gap:1rem">
+        <button type="button" class="btn btn-outline" id="btn-back-to-step2" data-i18n="register.back">Back</button>
+        <button type="button" class="btn btn-primary" style="flex:1" id="btn-pay" data-i18n="register.pay">Proceed to Payment</button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/i18n.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+let selectedCat = 'road';
+let registrationId = null;
+
+function selectCat(cat, el) {
+  selectedCat = cat;
+  document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function goToPanel(n) {
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + n).classList.add('active');
+  document.querySelectorAll('[id^="step-ind-"]').forEach((s, i) => {
+    const num = i + 1;
+    s.classList.remove('active', 'done');
+    if (num < n) s.classList.add('done');
+    if (num === n) s.classList.add('active');
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  // Pre-select category from URL param
+  const params = new URLSearchParams(location.search);
+  const urlCat = params.get('cat');
+  if (urlCat === 'mountain') {
+    document.querySelectorAll('.cat-card').forEach(c => {
+      c.classList.toggle('selected', c.dataset.cat === 'mountain');
+    });
+    selectedCat = 'mountain';
+  }
+
+  // Check auth
+  const user = await getUser();
+  if (!user) {
+    document.getElementById('not-logged-in').style.display = 'block';
+    document.getElementById('steps-indicator').style.display = 'none';
+    document.getElementById('panel-1').style.display = 'none';
+    return;
+  }
+
+  // Pre-fill email from user
+  document.getElementById('r-email').value = user.email || '';
+
+  // Step 1 → 2
+  document.getElementById('btn-to-step2').addEventListener('click', () => goToPanel(2));
+
+  // Step 2 → back
+  document.getElementById('btn-back-to-step1').addEventListener('click', () => goToPanel(1));
+
+  // Step 2 → 3 (form submit)
+  document.getElementById('registration-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errEl = document.getElementById('form-error');
+    errEl.classList.remove('show');
+    const btn = e.target.querySelector('button[type=submit]');
+    btn.disabled = true; btn.textContent = 'Saving...';
+
+    const regData = {
+      category:  selectedCat,
+      full_name: document.getElementById('r-name').value,
+      email:     document.getElementById('r-email').value,
+      phone:     document.getElementById('r-phone').value,
+      dob:       document.getElementById('r-dob').value,
+      gender:    document.getElementById('r-gender').value,
+      tshirt:    document.getElementById('r-tshirt').value,
+      ec_name:   document.getElementById('r-ec-name').value,
+      ec_phone:  document.getElementById('r-ec-phone').value,
+      medical:   document.getElementById('r-medical').checked,
+    };
+
+    const { data: reg, error } = await saveRegistration(regData);
+    btn.disabled = false; btn.textContent = 'Continue';
+
+    if (error) {
+      errEl.textContent = 'Error saving registration: ' + error.message;
+      errEl.classList.add('show');
+      return;
+    }
+
+    registrationId = reg?.id;
+
+    // Populate summary
+    document.getElementById('sum-name').textContent   = regData.full_name;
+    document.getElementById('sum-email').textContent  = regData.email;
+    document.getElementById('sum-cat').textContent    = selectedCat === 'road' ? 'Road Race' : 'Mountain Race';
+    document.getElementById('sum-tshirt').textContent = regData.tshirt;
+    document.getElementById('payment-cat-display').textContent = selectedCat === 'road' ? 'Road Race' : 'Mountain Race';
+
+    goToPanel(3);
+  });
+
+  // Step 3 → back
+  document.getElementById('btn-back-to-step2').addEventListener('click', () => goToPanel(2));
+
+  // Step 3 → Stripe Payment
+  document.getElementById('btn-pay').addEventListener('click', async () => {
+    const btn = document.getElementById('btn-pay');
+    btn.disabled = true; btn.textContent = 'Redirecting...';
+
+    const paymentLink = CONFIG.PAYMENT_LINKS[selectedCat];
+    const user = await getUser();
+    const email = encodeURIComponent(user?.email || document.getElementById('r-email').value);
+    const ref   = registrationId ? `&client_reference_id=${registrationId}` : '';
+
+    if (!paymentLink || paymentLink.startsWith('YOUR_')) {
+      // Fallback if payment links not yet configured
+      alert('Payment links not yet configured. Please contact the race organiser.');
+      btn.disabled = false; btn.textContent = 'Proceed to Payment';
+      return;
+    }
+
+    window.location.href = `${paymentLink}?prefilled_email=${email}${ref}&success_url=${encodeURIComponent(location.origin + '/payment-success.html')}&cancel_url=${encodeURIComponent(location.href)}`;
+  });
+});
+</script>
+</body>
+</html>

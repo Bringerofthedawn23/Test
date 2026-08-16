@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vasiliki Road & Mountain Race — Lefkada, Greece</title>
+  <meta name="description" content="The Vasiliki Road and Mountain Race — two legendary races a year through the mountains and roads of Vasiliki, Lefkada.">
+  <meta property="og:title" content="Vasiliki Road & Mountain Race">
+  <meta property="og:description" content="Two legendary races through the mountains and roads of Vasiliki, Lefkada.">
+  <meta property="og:image" content="assets/images/hero.jpg">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    /* Hero placeholder gradient until real photo is added */
+    .hero-bg { background: linear-gradient(135deg, #0D1B2A 0%, #1A3A5C 40%, #0A2A1A 100%); }
+    .about-img {
+      background: linear-gradient(135deg, #132033, #1A3A5C);
+      border-radius: 16px; min-height: 400px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 4rem; border: 1px solid var(--border);
+    }
+    .highlight-band { background: linear-gradient(90deg, rgba(255,107,53,0.08), rgba(0,180,216,0.08)); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <span class="logo-main">Vasiliki Race</span>
+      <span class="logo-sub">Lefkada · Greece</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html"    data-i18n="nav.home">Home</a></li>
+      <li><a href="about.html"   data-i18n="nav.about">About</a></li>
+      <li><a href="routes.html"  data-i18n="nav.routes">Routes</a></li>
+      <li><a href="register.html" data-i18n="nav.register">Register</a></li>
+      <li><a href="gallery.html" data-i18n="nav.gallery">Gallery</a></li>
+      <li><a href="contact.html" data-i18n="nav.contact">Contact</a></li>
+    </ul>
+    <div class="nav-actions">
+      <div class="lang-toggle">
+        <button data-lang="en">EN</button>
+        <button data-lang="el">ΕΛ</button>
+      </div>
+      <a href="login.html"     id="nav-login"   class="btn btn-outline btn-sm" data-i18n="nav.login">Login</a>
+      <a href="my-account.html" id="nav-account" class="btn btn-outline btn-sm hidden" data-i18n="nav.account">My Account</a>
+      <button id="nav-logout-btn" id="nav-logout" class="btn btn-outline btn-sm hidden" data-i18n="nav.logout">Logout</button>
+      <a href="register.html"  class="btn btn-primary btn-sm" data-i18n="nav.register">Register</a>
+    </div>
+    <button class="nav-hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile nav -->
+<div class="nav-mobile">
+  <a href="index.html"     data-i18n="nav.home">Home</a>
+  <a href="about.html"    data-i18n="nav.about">About</a>
+  <a href="routes.html"   data-i18n="nav.routes">Routes</a>
+  <a href="register.html" data-i18n="nav.register">Register</a>
+  <a href="gallery.html"  data-i18n="nav.gallery">Gallery</a>
+  <a href="contact.html"  data-i18n="nav.contact">Contact</a>
+  <a href="login.html"    data-i18n="nav.login">Login</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg">
+    <img src="assets/images/hero.jpg" alt="Vasiliki Race hero" id="hero-img">
+  </div>
+  <div class="hero-content fade-up">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      <span data-i18n="hero.badge">Vasiliki · Lefkada · Greece</span>
+    </div>
+    <h1 class="hero-title">
+      <span data-i18n="hero.title1">Road &</span><br>
+      <span class="text-accent" data-i18n="hero.title2">Mountain</span><br>
+      <span data-i18n="hero.title3">Race</span>
+    </h1>
+    <p class="hero-subtitle fade-up fade-up-delay-1" data-i18n="hero.subtitle">
+      Two legendary races through the mountains and roads of Vasiliki. Where nature meets competition.
+    </p>
+    <div class="hero-actions fade-up fade-up-delay-2">
+      <a href="register.html" class="btn btn-primary btn-lg" data-i18n="hero.cta">Register Now</a>
+      <a href="about.html"    class="btn btn-outline btn-lg" data-i18n="hero.learn">Learn More</a>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="val" data-i18n="hero.stat1val">TBD</div>
+      <div class="lbl" data-i18n="hero.stat1lbl">Road (km)</div>
+    </div>
+    <div class="hero-stat-divider"></div>
+    <div class="hero-stat">
+      <div class="val" data-i18n="hero.stat2val">TBD</div>
+      <div class="lbl" data-i18n="hero.stat2lbl">Mountain (km)</div>
+    </div>
+    <div class="hero-stat-divider"></div>
+    <div class="hero-stat">
+      <div class="val" data-i18n="hero.stat3val">2×</div>
+      <div class="lbl" data-i18n="hero.stat3lbl">Per Year</div>
+    </div>
+    <div class="hero-stat-divider"></div>
+    <div class="hero-stat">
+      <div class="val" data-i18n="hero.stat4val">↑ TBD</div>
+      <div class="lbl" data-i18n="hero.stat4lbl">Elevation (m)</div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAND -->
+<div class="stats-band">
+  <div class="container">
+    <div class="stat-item">
+      <div class="num">2<span class="unit">×</span></div>
+      <div class="label" data-i18n="about.feat3title">Twice a Year</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">🏔️</div>
+      <div class="label">Lefkada</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">🏁</div>
+      <div class="label">Road + Mountain</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">🌊</div>
+      <div class="label">Ionian Sea Views</div>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section>
+  <div class="container">
+    <div class="grid-2" style="align-items:center; gap:4rem;">
+      <div class="reveal">
+        <div class="section-label" data-i18n="about.label">About the Race</div>
+        <h2 class="section-title" data-i18n="about.title">Born from the Mountains of Lefkada</h2>
+        <p class="section-desc" style="margin-bottom:2rem" data-i18n="about.desc">
+          The Vasiliki Road & Mountain Race brings together runners from across Greece and Europe for a celebration of endurance, landscape, and community.
+        </p>
+        <a href="about.html" class="btn btn-outline" data-i18n="hero.learn">Learn More</a>
+      </div>
+      <div class="reveal">
+        <div class="about-img">🏔️</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RACE CATEGORIES -->
+<section style="padding-top:0">
+  <div class="container">
+    <div class="section-header centered reveal">
+      <div class="section-label" data-i18n="categories.label">Race Categories</div>
+      <h2 class="section-title" data-i18n="categories.title">Choose Your Challenge</h2>
+    </div>
+    <div class="grid-2">
+      <!-- Road Race Card -->
+      <div class="race-card reveal">
+        <div class="race-card-overlay"></div>
+        <div class="race-card-body">
+          <div class="race-card-tag" data-i18n="categories.road_tag">Road Race</div>
+          <h3 class="race-card-title" data-i18n="categories.road_title">Road Race</h3>
+          <div class="race-card-meta">
+            <span>📏 <span data-i18n="categories.road_dist">TBD km</span></span>
+            <span>⛰️ <span data-i18n="categories.road_elev">TBD m</span></span>
+            <span>🟡 <span data-i18n="categories.road_diff">Moderate</span></span>
+          </div>
+          <a href="register.html?cat=road" class="btn btn-primary" data-i18n="categories.road_btn">Register for Road</a>
+        </div>
+      </div>
+      <!-- Mountain Race Card -->
+      <div class="race-card reveal" style="background:linear-gradient(135deg, #0A2A1A, #1A3A2A);">
+        <div class="race-card-overlay"></div>
+        <div class="race-card-body">
+          <div class="race-card-tag mountain" data-i18n="categories.mtn_tag">Mountain Race</div>
+          <h3 class="race-card-title" data-i18n="categories.mtn_title">Mountain Race</h3>
+          <div class="race-card-meta">
+            <span>📏 <span data-i18n="categories.mtn_dist">TBD km</span></span>
+            <span>⛰️ <span data-i18n="categories.mtn_elev">TBD m</span></span>
+            <span>🔴 <span data-i18n="categories.mtn_diff">Challenging</span></span>
+          </div>
+          <a href="register.html?cat=mountain" class="btn btn-primary" data-i18n="categories.mtn_btn">Register for Mountain</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="highlight-band">
+  <div class="container">
+    <div class="grid-3">
+      <div class="card reveal">
+        <div class="card-icon">🏔️</div>
+        <h3 class="card-title" data-i18n="about.feat2title">Mountain Race</h3>
+        <p class="card-text"   data-i18n="about.feat2text">A demanding trail through the hills above Vasiliki. Technical terrain, breathtaking views.</p>
+      </div>
+      <div class="card reveal">
+        <div class="card-icon">🛣️</div>
+        <h3 class="card-title" data-i18n="about.feat1title">Road Race</h3>
+        <p class="card-text"   data-i18n="about.feat1text">A fast, scenic road course through the village and coastline of Vasiliki.</p>
+      </div>
+      <div class="card reveal">
+        <div class="card-icon">📅</div>
+        <h3 class="card-title" data-i18n="about.feat3title">Twice a Year</h3>
+        <p class="card-text"   data-i18n="about.feat3text">Spring and Autumn editions — two chances to race on these iconic routes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BAND -->
+<section style="padding:5rem 1.5rem; text-align:center;">
+  <div class="container reveal">
+    <div class="section-label">Ready?</div>
+    <h2 class="section-title" style="max-width:500px;margin:0 auto 1rem">Secure Your Place</h2>
+    <p class="section-desc" style="margin:0 auto 2.5rem">Limited spots available. Register now and be part of the Vasiliki Race community.</p>
+    <a href="register.html" class="btn btn-primary btn-lg" data-i18n="hero.cta">Register Now</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div>
+      <div class="footer-logo">Vasiliki Race</div>
+      <p class="footer-desc" data-i18n="footer.desc">Road & Mountain Race — Vasiliki, Lefkada. Two races a year through one of Greece's most beautiful islands.</p>
+      <div class="footer-social">
+        <a href="https://www.facebook.com/share/g/19JeD5B72P/" target="_blank" rel="noopener" title="Facebook">📘</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4 data-i18n="footer.links_race">Race</h4>
+      <a href="about.html"    data-i18n="footer.about">About</a>
+      <a href="routes.html"   data-i18n="footer.routes">Routes</a>
+      <a href="index.html#categories" data-i18n="footer.categories">Categories</a>
+      <a href="gallery.html"  data-i18n="footer.gallery">Gallery</a>
+    </div>
+    <div class="footer-col">
+      <h4 data-i18n="footer.links_info">Info</h4>
+      <a href="register.html" data-i18n="footer.register">Register</a>
+      <a href="contact.html"  data-i18n="footer.contact">Contact</a>
+      <a href="terms.html"    data-i18n="footer.terms">Terms & Rules</a>
+    </div>
+    <div class="footer-col">
+      <h4 data-i18n="footer.links_social">Follow</h4>
+      <a href="https://www.facebook.com/share/g/19JeD5B72P/" target="_blank" data-i18n="footer.facebook">Facebook Group</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy" data-i18n="footer.copy">© 2025 Vasiliki Road & Mountain Race. All rights reserved.</span>
+    <div class="lang-toggle">
+      <button data-lang="en">EN</button>
+      <button data-lang="el">ΕΛ</button>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
