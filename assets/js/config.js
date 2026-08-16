@@ -12,25 +12,26 @@ const CONFIG = {
 
   // Race categories and Stripe Payment Link URLs
   // Create Payment Links in your Stripe Dashboard → Payment Links → Create
+  // Add each URL below after creating it
   PAYMENT_LINKS: {
-    road:     'YOUR_STRIPE_PAYMENT_LINK_ROAD',     // e.g. https://buy.stripe.com/xxxxx
-    mountain: 'YOUR_STRIPE_PAYMENT_LINK_MOUNTAIN', // e.g. https://buy.stripe.com/yyyyy
+    '5km':  'YOUR_STRIPE_PAYMENT_LINK_5KM',   // e.g. https://buy.stripe.com/xxxxx
+    '10km': 'YOUR_STRIPE_PAYMENT_LINK_10KM',
+    '21km': 'YOUR_STRIPE_PAYMENT_LINK_21KM',
   },
 
-  // Admin email — registrations from this account can see all entries
-  ADMIN_EMAIL: 'YOUR_ADMIN_EMAIL',
+  // Admin email
+  ADMIN_EMAIL: 'orfeas3320@yahoo.gr',
 
-  // Race details (update these when dates and prices are confirmed)
+  // Race details
   RACE: {
-    road_distance_km:    'TBD',
-    road_elevation_m:    'TBD',
-    mountain_distance_km:'TBD',
-    mountain_elevation_m:'TBD',
-    entry_fee_road:      'TBD',
-    entry_fee_mountain:  'TBD',
-    currency:            '€',
-    editions:            ['Spring', 'Autumn'],
-    location:            'Vasiliki, Lefkada',
-    country:             'Greece',
+    categories: [
+      { id: '5km',  label: '5,000m',        fee: '€5 – €10',  difficulty: 'Easy',        icon: '🟢' },
+      { id: '10km', label: '10,000m',        fee: '€10 – €15', difficulty: 'Moderate',    icon: '🟡' },
+      { id: '21km', label: '21,097m (Half)', fee: '€15 – €20', difficulty: 'Challenging', icon: '🔴' },
+    ],
+    currency:  '€',
+    editions:  ['Spring', 'Autumn'],
+    location:  'Vasiliki, Lefkada',
+    country:   'Greece',
   }
 };

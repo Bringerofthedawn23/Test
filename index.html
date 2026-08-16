@@ -90,23 +90,23 @@
   </div>
   <div class="hero-stats">
     <div class="hero-stat">
-      <div class="val" data-i18n="hero.stat1val">TBD</div>
-      <div class="lbl" data-i18n="hero.stat1lbl">Road (km)</div>
+      <div class="val">5K</div>
+      <div class="lbl">5,000m</div>
     </div>
     <div class="hero-stat-divider"></div>
     <div class="hero-stat">
-      <div class="val" data-i18n="hero.stat2val">TBD</div>
-      <div class="lbl" data-i18n="hero.stat2lbl">Mountain (km)</div>
+      <div class="val">10K</div>
+      <div class="lbl">10,000m</div>
     </div>
     <div class="hero-stat-divider"></div>
     <div class="hero-stat">
-      <div class="val" data-i18n="hero.stat3val">2×</div>
-      <div class="lbl" data-i18n="hero.stat3lbl">Per Year</div>
+      <div class="val">21K</div>
+      <div class="lbl">Half Marathon</div>
     </div>
     <div class="hero-stat-divider"></div>
     <div class="hero-stat">
-      <div class="val" data-i18n="hero.stat4val">↑ TBD</div>
-      <div class="lbl" data-i18n="hero.stat4lbl">Elevation (m)</div>
+      <div class="val">2×</div>
+      <div class="lbl">Per Year</div>
     </div>
   </div>
 </section>
@@ -157,35 +157,46 @@
   <div class="container">
     <div class="section-header centered reveal">
       <div class="section-label" data-i18n="categories.label">Race Categories</div>
-      <h2 class="section-title" data-i18n="categories.title">Choose Your Challenge</h2>
+      <h2 class="section-title" data-i18n="categories.title">Choose Your Distance</h2>
     </div>
-    <div class="grid-2">
-      <!-- Road Race Card -->
-      <div class="race-card reveal">
+    <div class="grid-3">
+      <!-- 5km -->
+      <div class="race-card reveal" style="background:linear-gradient(160deg,#0D2A1A,#1A3A2A);">
         <div class="race-card-overlay"></div>
         <div class="race-card-body">
-          <div class="race-card-tag" data-i18n="categories.road_tag">Road Race</div>
-          <h3 class="race-card-title" data-i18n="categories.road_title">Road Race</h3>
+          <div class="race-card-tag" style="background:#22C55E" data-i18n="categories.tag_5km">5,000m</div>
+          <h3 class="race-card-title" data-i18n="categories.title_5km">5 Kilometres</h3>
           <div class="race-card-meta">
-            <span>📏 <span data-i18n="categories.road_dist">TBD km</span></span>
-            <span>⛰️ <span data-i18n="categories.road_elev">TBD m</span></span>
-            <span>🟡 <span data-i18n="categories.road_diff">Moderate</span></span>
+            <span>🟢 <span data-i18n="categories.diff_5km">Easy</span></span>
+            <span>💶 <span data-i18n="categories.fee_5km">€5 – €10</span></span>
           </div>
-          <a href="register.html?cat=road" class="btn btn-primary" data-i18n="categories.road_btn">Register for Road</a>
+          <a href="register.html?cat=5km" class="btn btn-primary" data-i18n="categories.btn_5km">Register — 5km</a>
         </div>
       </div>
-      <!-- Mountain Race Card -->
-      <div class="race-card reveal" style="background:linear-gradient(135deg, #0A2A1A, #1A3A2A);">
+      <!-- 10km -->
+      <div class="race-card reveal" style="background:linear-gradient(160deg,#1A2A0D,#2A3A1A);">
         <div class="race-card-overlay"></div>
         <div class="race-card-body">
-          <div class="race-card-tag mountain" data-i18n="categories.mtn_tag">Mountain Race</div>
-          <h3 class="race-card-title" data-i18n="categories.mtn_title">Mountain Race</h3>
+          <div class="race-card-tag" style="background:#EAB308" data-i18n="categories.tag_10km">10,000m</div>
+          <h3 class="race-card-title" data-i18n="categories.title_10km">10 Kilometres</h3>
           <div class="race-card-meta">
-            <span>📏 <span data-i18n="categories.mtn_dist">TBD km</span></span>
-            <span>⛰️ <span data-i18n="categories.mtn_elev">TBD m</span></span>
-            <span>🔴 <span data-i18n="categories.mtn_diff">Challenging</span></span>
+            <span>🟡 <span data-i18n="categories.diff_10km">Moderate</span></span>
+            <span>💶 <span data-i18n="categories.fee_10km">€10 – €15</span></span>
           </div>
-          <a href="register.html?cat=mountain" class="btn btn-primary" data-i18n="categories.mtn_btn">Register for Mountain</a>
+          <a href="register.html?cat=10km" class="btn btn-primary" data-i18n="categories.btn_10km">Register — 10km</a>
+        </div>
+      </div>
+      <!-- 21km -->
+      <div class="race-card reveal" style="background:linear-gradient(160deg,#1A0D0D,#2A1A1A);">
+        <div class="race-card-overlay"></div>
+        <div class="race-card-body">
+          <div class="race-card-tag" style="background:#EF4444" data-i18n="categories.tag_21km">21,097m</div>
+          <h3 class="race-card-title" data-i18n="categories.title_21km">Half Marathon</h3>
+          <div class="race-card-meta">
+            <span>🔴 <span data-i18n="categories.diff_21km">Challenging</span></span>
+            <span>💶 <span data-i18n="categories.fee_21km">€15 – €20</span></span>
+          </div>
+          <a href="register.html?cat=21km" class="btn btn-primary" data-i18n="categories.btn_21km">Register — 21km</a>
         </div>
       </div>
     </div>

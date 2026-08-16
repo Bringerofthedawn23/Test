@@ -89,22 +89,21 @@
     <!-- STEP 1: Category + Account check -->
     <div class="step-panel active" id="panel-1">
       <h3 style="font-family:var(--font-h);margin-bottom:1.25rem;font-size:1rem;letter-spacing:0.06em;text-transform:uppercase" data-i18n="register.cat_label">Select Race Category</h3>
-      <div class="cat-selector">
-        <div class="cat-card selected" data-cat="road" onclick="selectCat('road', this)">
-          <div class="cat-icon">🛣️</div>
-          <div class="cat-name" data-i18n="categories.road_title">Road Race</div>
-          <div class="cat-meta">
-            <span data-i18n="categories.road_dist">TBD km</span> ·
-            <span data-i18n="categories.road_diff">Moderate</span>
-          </div>
+      <div class="cat-selector" style="grid-template-columns:1fr 1fr 1fr">
+        <div class="cat-card selected" data-cat="5km" onclick="selectCat('5km', this)">
+          <div class="cat-icon">🟢</div>
+          <div class="cat-name" data-i18n="categories.title_5km">5 Kilometres</div>
+          <div class="cat-meta">5,000m · <span data-i18n="categories.fee_5km">€5 – €10</span></div>
         </div>
-        <div class="cat-card" data-cat="mountain" onclick="selectCat('mountain', this)">
-          <div class="cat-icon">🏔️</div>
-          <div class="cat-name" data-i18n="categories.mtn_title">Mountain Race</div>
-          <div class="cat-meta">
-            <span data-i18n="categories.mtn_dist">TBD km</span> ·
-            <span data-i18n="categories.mtn_diff">Challenging</span>
-          </div>
+        <div class="cat-card" data-cat="10km" onclick="selectCat('10km', this)">
+          <div class="cat-icon">🟡</div>
+          <div class="cat-name" data-i18n="categories.title_10km">10 Kilometres</div>
+          <div class="cat-meta">10,000m · <span data-i18n="categories.fee_10km">€10 – €15</span></div>
+        </div>
+        <div class="cat-card" data-cat="21km" onclick="selectCat('21km', this)">
+          <div class="cat-icon">🔴</div>
+          <div class="cat-name" data-i18n="categories.title_21km">Half Marathon</div>
+          <div class="cat-meta">21,097m · <span data-i18n="categories.fee_21km">€15 – €20</span></div>
         </div>
       </div>
       <button class="btn btn-primary btn-full" id="btn-to-step2" data-i18n="register.next">Continue</button>
@@ -259,11 +258,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Pre-select category from URL param
   const params = new URLSearchParams(location.search);
   const urlCat = params.get('cat');
-  if (urlCat === 'mountain') {
+  if (urlCat && ['5km','10km','21km'].includes(urlCat)) {
     document.querySelectorAll('.cat-card').forEach(c => {
-      c.classList.toggle('selected', c.dataset.cat === 'mountain');
+      c.classList.toggle('selected', c.dataset.cat === urlCat);
     });
-    selectedCat = 'mountain';
+    selectedCat = urlCat;
   }
 
   // Check auth
@@ -319,9 +318,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Populate summary
     document.getElementById('sum-name').textContent   = regData.full_name;
     document.getElementById('sum-email').textContent  = regData.email;
-    document.getElementById('sum-cat').textContent    = selectedCat === 'road' ? 'Road Race' : 'Mountain Race';
+    const catLabels = { '5km': '5km (5,000m)', '10km': '10km (10,000m)', '21km': 'Half Marathon (21,097m)' };
+    document.getElementById('sum-cat').textContent    = catLabels[selectedCat] || selectedCat;
     document.getElementById('sum-tshirt').textContent = regData.tshirt;
-    document.getElementById('payment-cat-display').textContent = selectedCat === 'road' ? 'Road Race' : 'Mountain Race';
+    const catLabels2 = { '5km': '5km (5,000m)', '10km': '10km (10,000m)', '21km': 'Half Marathon (21,097m)' };
+    document.getElementById('payment-cat-display').textContent = catLabels2[selectedCat] || selectedCat;
 
     goToPanel(3);
   });
