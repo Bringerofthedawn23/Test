@@ -5,8 +5,8 @@
    ============================================================ */
 
 const CONFIG = {
-  SUPABASE_URL:  'YOUR_SUPABASE_URL',          // e.g. https://xxxxx.supabase.co
-  SUPABASE_KEY:  'YOUR_SUPABASE_ANON_KEY',     // eyJ... (anon public key)
+  SUPABASE_URL:  'https://dqpguqpzqfngxvxvyvdn.supabase.co',
+  SUPABASE_KEY:  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRxcGd1cXB6cWZuZ3h2eHZ5dmRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4ODA3ODIsImV4cCI6MjEwMjQ1Njc4Mn0.hCLgKn16LEr6EsFz_rr_CRjcs9mw90yrfbge8o5zcHQ',
   STRIPE_PK:     'pk_test_51U54aXRtPEshzk8GPs3g1xBwu8mAPZtOfngXXgKjGPDIj2OIx42on4kY9HfYWDMmaeyeu47qApiRPKSDfJf5YS9G00BFkZDdae',
   FACEBOOK_GROUP: 'https://www.facebook.com/share/g/19JeD5B72P/',
 
