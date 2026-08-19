@@ -17,6 +17,8 @@ DI libraries, just the Android SDK.
 - **Offline-friendly** — rates are cached for 6 hours in `SharedPreferences`,
   and a built-in fallback snapshot lets the app convert even on first launch
   with no network.
+- **Quick-convert chips** — a row of common currencies (USD, EUR, GBP, JPY, …)
+  that set the target currency in one tap.
 - **Swap**, **Refresh**, and locale-aware currency formatting.
 - Remembers your last **from/to** selection.
 - **Light & dark** via Material 3 `DayNight`.
@@ -46,6 +48,47 @@ echo "sdk.dir=$HOME/Android/Sdk" > local.properties
 > Note: the first build downloads the Android Gradle Plugin and AndroidX
 > dependencies from Google's Maven repository, so an internet connection is
 > needed the first time.
+
+## Signed release builds
+
+Release signing is read from a git-ignored `keystore.properties` at the project
+root. Without it, `assembleRelease` still builds — just unsigned.
+
+```bash
+# 1. Generate a keystore (once)
+keytool -genkeypair -v -keystore release.keystore \
+  -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000
+
+# 2. Configure signing
+cp keystore.properties.example keystore.properties
+#    then edit keystore.properties with your passwords/alias
+
+# 3. Build the signed release APK
+./gradlew assembleRelease
+# -> app/build/outputs/apk/release/app-release.apk
+```
+
+`keystore.properties`, `*.keystore`, and `*.jks` are git-ignored — never commit
+your keystore or its passwords.
+
+## Continuous integration
+
+`.github/workflows/android.yml` builds the app on every push and pull request:
+
+- Builds the **debug APK** and uploads it as the `app-debug` build artifact.
+- If the signing secrets below are set on the repository, it also builds and
+  uploads a **signed release APK** (`app-release`).
+
+Download the APK from the workflow run's **Artifacts** section. To enable signed
+release builds in CI, add these repository secrets (Settings → Secrets and
+variables → Actions):
+
+| Secret | Value |
+| --- | --- |
+| `KEYSTORE_BASE64` | `base64 -w0 release.keystore` |
+| `KEYSTORE_STORE_PASSWORD` | keystore password |
+| `KEYSTORE_KEY_ALIAS` | key alias |
+| `KEYSTORE_KEY_PASSWORD` | key password |
 
 ## Project layout
 

@@ -6,6 +6,7 @@ import android.text.TextWatcher
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import com.example.currencyconverter.databinding.ActivityMainBinding
+import com.google.android.material.chip.Chip
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Currency
@@ -33,10 +34,29 @@ class MainActivity : AppCompatActivity() {
 
         restorePreferences()
         setupInputs()
+        setupQuickPicks()
 
         // Show something immediately, then refresh from the network.
         applyRates(repo.loadCachedOrFallback())
         if (!repo.hasFreshCache()) refresh()
+    }
+
+    /** A row of chips that quickly set the target ("To") currency. */
+    private fun setupQuickPicks() {
+        binding.quickPickGroup.removeAllViews()
+        for (code in COMMON_CURRENCIES) {
+            val chip = layoutInflater.inflate(
+                R.layout.item_quick_chip, binding.quickPickGroup, false
+            ) as Chip
+            chip.text = code
+            chip.setOnClickListener {
+                toCode = code
+                binding.toDropdown.setText(Currencies.label(toCode), false)
+                convert()
+                savePreferences()
+            }
+            binding.quickPickGroup.addView(chip)
+        }
     }
 
     // ---- UI wiring ----------------------------------------------------------
@@ -205,5 +225,11 @@ class MainActivity : AppCompatActivity() {
             .putString("from", fromCode)
             .putString("to", toCode)
             .apply()
+    }
+
+    companion object {
+        private val COMMON_CURRENCIES = listOf(
+            "USD", "EUR", "GBP", "JPY", "CNY", "INR", "CAD", "AUD", "CHF"
+        )
     }
 }

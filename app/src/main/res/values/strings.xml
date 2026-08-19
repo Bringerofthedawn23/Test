@@ -6,6 +6,7 @@
     <string name="to">To</string>
     <string name="swap">Swap currencies</string>
     <string name="refresh">Refresh</string>
+    <string name="quick_pick">Quick convert to</string>
 
     <string name="dash">—</string>
     <string name="enter_amount">Enter an amount</string>
