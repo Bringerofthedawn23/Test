@@ -3,6 +3,7 @@ package com.example.currencyconverter
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import com.example.currencyconverter.databinding.ActivityMainBinding
@@ -24,6 +25,9 @@ class MainActivity : AppCompatActivity() {
 
     private var fromCode: String = "USD"
     private var toCode: String = "EUR"
+
+    // Guards against a slow history response overwriting a newer pair's chart.
+    private var historyToken = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,7 +56,7 @@ class MainActivity : AppCompatActivity() {
             chip.setOnClickListener {
                 toCode = code
                 binding.toDropdown.setText(Currencies.label(toCode), false)
-                convert()
+                pairChanged()
                 savePreferences()
             }
             binding.quickPickGroup.addView(chip)
@@ -70,12 +74,12 @@ class MainActivity : AppCompatActivity() {
 
         binding.fromDropdown.setOnItemClickListener { _, _, _, _ ->
             labelToCode[binding.fromDropdown.text.toString()]?.let { fromCode = it }
-            convert()
+            pairChanged()
             savePreferences()
         }
         binding.toDropdown.setOnItemClickListener { _, _, _, _ ->
             labelToCode[binding.toDropdown.text.toString()]?.let { toCode = it }
-            convert()
+            pairChanged()
             savePreferences()
         }
 
@@ -93,7 +97,7 @@ class MainActivity : AppCompatActivity() {
             toCode = tmp
             binding.fromDropdown.setText(Currencies.label(fromCode), false)
             binding.toDropdown.setText(Currencies.label(toCode), false)
-            convert()
+            pairChanged()
             savePreferences()
         }
 
@@ -123,7 +127,33 @@ class MainActivity : AppCompatActivity() {
         binding.toDropdown.setText(Currencies.label(toCode), false)
 
         showStatus(newRates)
+        pairChanged()
+    }
+
+    /** Recompute the result and refresh the trend sparkline for the pair. */
+    private fun pairChanged() {
         convert()
+        updateHistory()
+    }
+
+    private fun updateHistory() {
+        val token = ++historyToken
+        binding.trendContainer.visibility = View.GONE
+        repo.fetchHistory(
+            from = fromCode,
+            to = toCode,
+            post = { runnable -> runOnUiThread(runnable) },
+            onResult = { series ->
+                // Ignore results for a pair the user has already moved away from.
+                if (token != historyToken) return@fetchHistory
+                if (series.size < 2) {
+                    binding.trendContainer.visibility = View.GONE
+                } else {
+                    binding.sparkline.setValues(series)
+                    binding.trendContainer.visibility = View.VISIBLE
+                }
+            },
+        )
     }
 
     // ---- Conversion ---------------------------------------------------------

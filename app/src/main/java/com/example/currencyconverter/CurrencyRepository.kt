@@ -4,6 +4,8 @@ import android.content.Context
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
+import java.net.URLEncoder
+import java.time.LocalDate
 import java.util.concurrent.Executors
 
 /**
@@ -26,6 +28,7 @@ class CurrencyRepository(context: Context) {
     private val prefs = context.applicationContext
         .getSharedPreferences("cc_store", Context.MODE_PRIVATE)
     private val io = Executors.newSingleThreadExecutor()
+    private val historyCache = HashMap<String, List<Double>>()
 
     // ---- Public API ---------------------------------------------------------
 
@@ -79,6 +82,48 @@ class CurrencyRepository(context: Context) {
                 post(Runnable { onSuccess(rates) })
             } catch (e: Exception) {
                 post(Runnable { onError(e.message ?: "Network error") })
+            }
+        }
+    }
+
+    /**
+     * Fetch a ~30-day daily history of the FROM→TO rate for a simple trend
+     * sparkline, using the Frankfurter time-series API (ECB data). Only its
+     * ~30 supported currencies return data; anything else (or no network)
+     * yields an empty list, and the caller simply hides the chart. Results are
+     * cached in-memory for the session, keyed by the pair.
+     */
+    fun fetchHistory(
+        from: String,
+        to: String,
+        post: (Runnable) -> Unit,
+        onResult: (List<Double>) -> Unit,
+    ) {
+        if (from == to) {
+            post(Runnable { onResult(emptyList()) })
+            return
+        }
+        historyCache["${from}_$to"]?.let {
+            post(Runnable { onResult(it) })
+            return
+        }
+        io.execute {
+            try {
+                val end = LocalDate.now()
+                val start = end.minusDays(30)
+                val url = "https://api.frankfurter.app/$start..$end" +
+                    "?from=${URLEncoder.encode(from, "UTF-8")}" +
+                    "&to=${URLEncoder.encode(to, "UTF-8")}"
+                val json = httpGetJson(url)
+                val ratesObj = json.getJSONObject("rates")
+                val series = ratesObj.keys().asSequence().sorted().mapNotNull { date ->
+                    val v = ratesObj.getJSONObject(date).optDouble(to, Double.NaN)
+                    if (v.isNaN()) null else v
+                }.toList()
+                historyCache["${from}_$to"] = series
+                post(Runnable { onResult(series) })
+            } catch (e: Exception) {
+                post(Runnable { onResult(emptyList()) })
             }
         }
     }

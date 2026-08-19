@@ -19,6 +19,9 @@ DI libraries, just the Android SDK.
   with no network.
 - **Quick-convert chips** — a row of common currencies (USD, EUR, GBP, JPY, …)
   that set the target currency in one tap.
+- **30-day trend sparkline** — a small chart of the recent daily rate for the
+  selected pair (via the Frankfurter/ECB time-series API); shown for supported
+  pairs and quietly hidden otherwise.
 - **Swap**, **Refresh**, and locale-aware currency formatting.
 - Remembers your last **from/to** selection.
 - **Light & dark** via Material 3 `DayNight`.
@@ -89,6 +92,20 @@ variables → Actions):
 | `KEYSTORE_STORE_PASSWORD` | keystore password |
 | `KEYSTORE_KEY_ALIAS` | key alias |
 | `KEYSTORE_KEY_PASSWORD` | key password |
+
+## Tagged releases
+
+Pushing a version tag builds a signed release APK and publishes it as a GitHub
+Release (`.github/workflows/release.yml`):
+
+```bash
+git tag v1.0
+git push origin v1.0
+```
+
+The APK is attached to the release as `currency-converter-v1.0.apk`, with
+auto-generated release notes. Signing uses the same secrets as CI; without them
+the attached APK is unsigned.
 
 ## Project layout
 
