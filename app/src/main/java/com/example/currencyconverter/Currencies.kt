@@ -158,7 +158,7 @@ object Currencies {
         "UAH" to Info("Ukrainian Hryvnia", "₴"),
         "UGX" to Info("Ugandan Shilling", "USh"),
         "USD" to Info("United States Dollar", "$"),
-        "UYU" to Info("Uruguayan Peso", "$U"),
+        "UYU" to Info("Uruguayan Peso", "\$U"),
         "UZS" to Info("Uzbekistani Som", "so'm"),
         "VES" to Info("Venezuelan Bolívar", "Bs."),
         "VND" to Info("Vietnamese Dong", "₫"),
