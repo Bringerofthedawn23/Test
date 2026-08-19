@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">Currency Converter</string>
+
+    <string name="amount">Amount</string>
+    <string name="from">From</string>
+    <string name="to">To</string>
+    <string name="swap">Swap currencies</string>
+    <string name="refresh">Refresh</string>
+
+    <string name="dash">—</string>
+    <string name="enter_amount">Enter an amount</string>
+    <string name="rate_unavailable">Rate unavailable</string>
+    <!-- e.g. "1 USD = 0.92 EUR" -->
+    <string name="rate_line">1 %1$s = %2$s %3$s</string>
+
+    <string name="fetching">Fetching live rates…</string>
+    <string name="status_live">Live rates · updated %1$s</string>
+    <string name="status_cached">Cached rates · updated %1$s</string>
+    <string name="status_cached_stale">Cached rates (stale) · updated %1$s</string>
+    <string name="status_estimates">Offline estimates</string>
+    <string name="status_offline">Offline · %1$s</string>
+</resources>
