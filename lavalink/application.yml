@@ -1,0 +1,126 @@
+# ─────────────────────────────────────────────────────────────
+#  Lavalink v4 configuration
+#
+#  Handles all audio: resolving tracks from many platforms and
+#  streaming high-bitrate Opus to Discord. Plugins add Spotify,
+#  Apple Music, Deezer and a maintained YouTube source.
+# ─────────────────────────────────────────────────────────────
+
+server:
+  port: 2333
+  address: 0.0.0.0
+  http2:
+    enabled: false
+
+lavalink:
+  plugins:
+    # Maintained YouTube source (Lavalink's built-in YT is deprecated).
+    - dependency: "dev.lavalink.youtube:youtube-plugin:1.11.4"
+      snapshot: false
+    # LavaSrc: Spotify, Apple Music, Deezer, Yandex Music, etc.
+    - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.3.0"
+      snapshot: false
+
+  server:
+    password: "${LAVALINK_PASSWORD:youshallnotpass}"
+
+    # ── Audio quality ────────────────────────────────────────
+    # Opus encoding quality 0-10 (10 = best). bufferDurationMs and
+    # frameBufferDurationMs are tuned for smooth, artifact-free
+    # playback. opusEncodingQuality 10 gives the cleanest sound
+    # Discord's Opus pipeline can carry.
+    opusEncodingQuality: 10
+    resamplingQuality: HIGH
+    bufferDurationMs: 400
+    frameBufferDurationMs: 5000
+    trackStuckThresholdMs: 10000
+    useSeekGhosting: true
+    youtubePlaylistLoadLimit: 6
+    playerUpdateInterval: 5
+    youtubeSearchEnabled: true
+    soundcloudSearchEnabled: true
+
+    # ── Built-in sources ─────────────────────────────────────
+    # YouTube is disabled here because the youtube-plugin above
+    # supersedes it. The rest are Lavalink's native extractors.
+    sources:
+      youtube: false
+      bandcamp: true
+      soundcloud: true
+      twitch: true
+      vimeo: true
+      nico: true
+      http: true
+      local: false
+
+    filters:
+      volume: true
+      equalizer: true
+      karaoke: true
+      timescale: true
+      tremolo: true
+      vibrato: true
+      distortion: true
+      rotation: true
+      channelMix: true
+      lowPass: true
+
+plugins:
+  # ── YouTube plugin ─────────────────────────────────────────
+  youtube:
+    enabled: true
+    allowSearch: true
+    allowDirectVideoIds: true
+    allowDirectPlaylistIds: true
+    clients:
+      - MUSIC
+      - WEB
+      - WEBEMBEDDED
+      - ANDROID_MUSIC
+      - TVHTML5EMBEDDED
+
+  # ── LavaSrc (Spotify / Apple Music / Deezer / …) ───────────
+  lavasrc:
+    providers:
+      - "ytmsearch:\"%ISRC%\""
+      - "ytmsearch:%QUERY%"
+      - "ytsearch:%QUERY%"
+    sources:
+      spotify: true
+      applemusic: false
+      deezer: false
+      yandexmusic: false
+    spotify:
+      clientId: "${SPOTIFY_CLIENT_ID:}"
+      clientSecret: "${SPOTIFY_CLIENT_SECRET:}"
+      countryCode: "US"
+      playlistLoadLimit: 6
+      albumLoadLimit: 6
+    applemusic:
+      countryCode: "US"
+      mediaAPIToken: "${APPLE_MUSIC_TOKEN:}"
+      playlistLoadLimit: 6
+      albumLoadLimit: 6
+    deezer:
+      masterDecryptionKey: ""
+      arl: "${DEEZER_ARL:}"
+
+metrics:
+  prometheus:
+    enabled: false
+
+logging:
+  level:
+    root: INFO
+    lavalink: INFO
+  request:
+    enabled: true
+    includeClientInfo: true
+    includeHeaders: false
+    includeQueryString: true
+    includePayload: true
+    maxPayloadLength: 10000
+  logback:
+    rollingpolicy:
+      max-file-size: 25MB
+      max-history: 7

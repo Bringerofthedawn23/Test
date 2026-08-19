@@ -1,0 +1,58 @@
+# ─────────────────────────────────────────────────────────────
+#  One command to run everything:  docker compose up -d
+#
+#  - lavalink : the audio node (Java) that streams to Discord
+#  - bot      : the discord.js client (this project)
+# ─────────────────────────────────────────────────────────────
+
+services:
+  lavalink:
+    image: ghcr.io/lavalink-devs/lavalink:4
+    container_name: music-lavalink
+    restart: unless-stopped
+    environment:
+      _JAVA_OPTIONS: "-Xmx1G"
+      SERVER_PORT: "2333"
+      LAVALINK_PASSWORD: "${LAVALINK_PASSWORD:-youshallnotpass}"
+      SPOTIFY_CLIENT_ID: "${SPOTIFY_CLIENT_ID:-}"
+      SPOTIFY_CLIENT_SECRET: "${SPOTIFY_CLIENT_SECRET:-}"
+      APPLE_MUSIC_TOKEN: "${APPLE_MUSIC_TOKEN:-}"
+      DEEZER_ARL: "${DEEZER_ARL:-}"
+    volumes:
+      - ./lavalink/application.yml:/opt/Lavalink/application.yml:ro
+      - lavalink-plugins:/opt/Lavalink/plugins
+    networks:
+      - music-net
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 2333 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
+  bot:
+    build: .
+    container_name: music-bot
+    restart: unless-stopped
+    depends_on:
+      lavalink:
+        condition: service_healthy
+    environment:
+      DISCORD_TOKEN: "${DISCORD_TOKEN}"
+      CLIENT_ID: "${CLIENT_ID}"
+      GUILD_ID: "${GUILD_ID:-}"
+      LAVALINK_HOST: "lavalink"
+      LAVALINK_PORT: "2333"
+      LAVALINK_PASSWORD: "${LAVALINK_PASSWORD:-youshallnotpass}"
+      LAVALINK_SECURE: "false"
+      DEFAULT_SEARCH: "${DEFAULT_SEARCH:-ytmsearch}"
+      DEFAULT_VOLUME: "${DEFAULT_VOLUME:-80}"
+    networks:
+      - music-net
+
+networks:
+  music-net:
+    driver: bridge
+
+volumes:
+  lavalink-plugins:
