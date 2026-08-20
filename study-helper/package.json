@@ -1,0 +1,15 @@
+{
+  "name": "study-helper",
+  "version": "1.0.0",
+  "description": "Upload a photo of homework and get a step-by-step explanation, powered by Claude.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.68.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2"
+  }
+}

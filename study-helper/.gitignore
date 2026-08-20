@@ -1,0 +1,3 @@
+# Never upload your secret key or installed packages to GitHub
+.env
+node_modules/

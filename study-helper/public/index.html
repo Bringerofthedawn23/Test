@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Study Helper</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+    .wrap { width: 100%; max-width: 640px; }
+    h1 { font-size: 1.6rem; margin: 0 0 4px; }
+    p.sub { color: var(--muted); margin: 0 0 24px; }
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    label.upload {
+      display: block;
+      border: 2px dashed #475569;
+      border-radius: 12px;
+      padding: 32px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s;
+    }
+    label.upload:hover { border-color: var(--accent); }
+    label.upload span { color: var(--muted); font-size: .95rem; }
+    input[type="file"] { display: none; }
+    img#preview {
+      max-width: 100%;
+      border-radius: 12px;
+      margin-top: 16px;
+      display: none;
+    }
+    button {
+      width: 100%;
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-top: 16px;
+      transition: background .2s;
+    }
+    button:hover:not(:disabled) { background: var(--accent-hover); }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    #result {
+      white-space: pre-wrap;
+      line-height: 1.6;
+      font-size: 1rem;
+    }
+    #result.empty { color: var(--muted); }
+    .spinner {
+      display: inline-block;
+      width: 18px; height: 18px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    footer { text-align: center; color: var(--muted); font-size: .8rem; margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>📚 Study Helper</h1>
+    <p class="sub">Take a photo of your homework and get a step-by-step explanation.</p>
+
+    <div class="card">
+      <label class="upload" for="fileInput">
+        📷 <strong>Tap to choose a photo</strong><br />
+        <span>or take one with your camera</span>
+      </label>
+      <input type="file" id="fileInput" accept="image/*" capture="environment" />
+      <img id="preview" alt="Your homework" />
+      <button id="solveBtn" disabled>Explain it to me</button>
+    </div>
+
+    <div class="card">
+      <div id="result" class="empty">Your explanation will appear here.</div>
+    </div>
+
+    <footer>Powered by Claude</footer>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById("fileInput");
+    const preview = document.getElementById("preview");
+    const solveBtn = document.getElementById("solveBtn");
+    const result = document.getElementById("result");
+
+    let imageBase64 = null;
+    let mediaType = null;
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      mediaType = file.type; // e.g. "image/jpeg"
+      const reader = new FileReader();
+      reader.onload = () => {
+        // reader.result looks like: "data:image/jpeg;base64,AAAA..."
+        // We only need the part after the comma.
+        imageBase64 = reader.result.split(",")[1];
+        preview.src = reader.result;
+        preview.style.display = "block";
+        solveBtn.disabled = false;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    solveBtn.addEventListener("click", async () => {
+      if (!imageBase64) return;
+
+      solveBtn.disabled = true;
+      solveBtn.innerHTML = '<span class="spinner"></span>Thinking...';
+      result.classList.remove("empty");
+      result.textContent = "";
+
+      try {
+        const res = await fetch("/api/solve", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ imageBase64, mediaType }),
+        });
+        const data = await res.json();
+
+        if (data.error) {
+          result.textContent = "⚠️ " + data.error;
+        } else {
+          result.textContent = data.answer;
+        }
+      } catch (err) {
+        result.textContent = "⚠️ Could not reach the server. Is it running?";
+      } finally {
+        solveBtn.disabled = false;
+        solveBtn.textContent = "Explain it to me";
+      }
+    });
+  </script>
+</body>
+</html>
