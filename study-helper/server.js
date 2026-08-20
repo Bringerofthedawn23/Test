@@ -91,7 +91,13 @@ function buildSystemPrompt(gradeLevel, detail) {
   // How much detail to give.
   const detailGuide =
     detail === "detailed"
-      ? "Give a FULL explanation. Show every step and briefly explain WHY each step works, so the student really understands. Use as many steps as needed."
+      ? `Give a FULL explanation. Follow this exact order:
+1. First, write out the problem in plain typed text, exactly as someone would
+   type it on a keyboard (for example: "2x + 5 = 13" or "H2O + CO2 -> ?").
+2. Then break the problem into its parts and explain what each part means in
+   simple words (what is being asked, what each number/symbol/term is).
+3. Then solve it step by step. Number the steps and briefly explain WHY each
+   step works, so the student really understands. Use as many steps as needed.`
       : "Keep it SIMPLE and SHORT. Only the key steps (aim for 3 to 5). One short sentence per step. No long paragraphs.";
 
   return `You are a friendly tutor. A student sends a photo or types a homework
