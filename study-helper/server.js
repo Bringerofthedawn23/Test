@@ -13,8 +13,24 @@ import "dotenv/config"; // loads your secret keys from the .env file
 import express from "express";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
+import Stripe from "stripe";
 
 const app = express();
+
+// --- Stripe setup (payments) ---
+const STRIPE_SECRET_KEY = (process.env.STRIPE_SECRET_KEY || "").trim();
+const STRIPE_PRICE_ID = (process.env.STRIPE_PRICE_ID || "").trim();
+const STRIPE_WEBHOOK_SECRET = (process.env.STRIPE_WEBHOOK_SECRET || "").trim();
+const stripe = STRIPE_SECRET_KEY ? new Stripe(STRIPE_SECRET_KEY) : null;
+
+// The Stripe webhook must read the RAW body to verify the signature, so it is
+// registered BEFORE the JSON parser below. (Defined near the bottom, but the
+// route with express.raw is attached here so JSON parsing doesn't touch it.)
+app.post(
+  "/api/stripe-webhook",
+  express.raw({ type: "application/json" }),
+  handleStripeWebhook
+);
 
 // Allow the page to send us a photo (photos are large, so raise the limit).
 app.use(express.json({ limit: "15mb" }));
@@ -54,6 +70,7 @@ app.get("/api/config", (req, res) => {
     supabaseAnonKey: SUPABASE_ANON_KEY || "",
     accountsEnabled: Boolean(supabaseAdmin),
     freeQuestions: FREE_QUESTIONS,
+    paymentsEnabled: Boolean(stripe && STRIPE_PRICE_ID),
   });
 });
 
@@ -300,6 +317,89 @@ app.post("/api/solve", async (req, res) => {
     });
   }
 });
+
+// ------------------------------------------------------------------
+// PAYMENTS (Stripe) — start a subscription checkout
+// ------------------------------------------------------------------
+app.post("/api/create-checkout", async (req, res) => {
+  try {
+    if (!stripe || !STRIPE_PRICE_ID) {
+      return res.status(400).json({ error: "Payments are not set up yet." });
+    }
+    const user = await getUser(req);
+    if (!user) {
+      return res.status(401).json({ error: "Please sign in first." });
+    }
+
+    // Where Stripe sends the user back to after paying / cancelling.
+    const origin =
+      req.headers.origin ||
+      `${req.protocol}://${req.headers.host}`;
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      line_items: [{ price: STRIPE_PRICE_ID, quantity: 1 }],
+      customer_email: user.email,
+      client_reference_id: user.id, // ties the payment to this user
+      metadata: { user_id: user.id },
+      success_url: `${origin}/?subscribed=1`,
+      cancel_url: `${origin}/?canceled=1`,
+    });
+
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error("Stripe checkout error:", err);
+    res.status(500).json({ error: "Could not start checkout. Please try again." });
+  }
+});
+
+// Stripe calls this automatically when a payment succeeds or a subscription
+// is cancelled. We verify it really came from Stripe, then update the user.
+async function handleStripeWebhook(req, res) {
+  if (!stripe || !STRIPE_WEBHOOK_SECRET) return res.status(400).end();
+
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      req.headers["stripe-signature"],
+      STRIPE_WEBHOOK_SECRET
+    );
+  } catch (err) {
+    console.error("Webhook signature check failed:", err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  try {
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object;
+      const userId = session.client_reference_id || session.metadata?.user_id;
+      if (userId && supabaseAdmin) {
+        await supabaseAdmin
+          .from("study_usage")
+          .update({
+            is_subscribed: true,
+            stripe_customer_id: session.customer,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("user_id", userId);
+      }
+    } else if (event.type === "customer.subscription.deleted") {
+      // Subscription cancelled/ended — turn access back to free.
+      const sub = event.data.object;
+      if (sub.customer && supabaseAdmin) {
+        await supabaseAdmin
+          .from("study_usage")
+          .update({ is_subscribed: false, updated_at: new Date().toISOString() })
+          .eq("stripe_customer_id", sub.customer);
+      }
+    }
+  } catch (err) {
+    console.error("Webhook handling error:", err);
+  }
+
+  res.json({ received: true });
+}
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

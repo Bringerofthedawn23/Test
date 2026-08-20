@@ -410,11 +410,47 @@
       }
     });
 
-    // Subscribe button — payment gets wired in Part 3b (Stripe).
-    subscribeBtn.addEventListener("click", () => {
+    // Subscribe button — start Stripe checkout.
+    subscribeBtn.addEventListener("click", async () => {
       subscribeMsg.className = "msg";
-      subscribeMsg.textContent = "Payments are being set up — coming very soon!";
+      if (!cfg.paymentsEnabled) {
+        subscribeMsg.textContent = "Payments are being set up — coming very soon!";
+        return;
+      }
+      const { data: sess } = await supabase.auth.getSession();
+      if (!sess.session) { location.reload(); return; }
+      subscribeBtn.disabled = true;
+      subscribeBtn.textContent = "Opening checkout…";
+      try {
+        const res = await fetch("/api/create-checkout", {
+          method: "POST",
+          headers: { Authorization: "Bearer " + sess.session.access_token },
+        });
+        const data = await res.json();
+        if (data.url) {
+          window.location.href = data.url; // go to Stripe's secure payment page
+        } else {
+          subscribeMsg.className = "msg error";
+          subscribeMsg.textContent = data.error || "Could not start checkout.";
+          subscribeBtn.disabled = false;
+          subscribeBtn.textContent = "Subscribe";
+        }
+      } catch (err) {
+        subscribeMsg.className = "msg error";
+        subscribeMsg.textContent = "Could not reach the server. Please try again.";
+        subscribeBtn.disabled = false;
+        subscribeBtn.textContent = "Subscribe";
+      }
     });
+
+    // If we just came back from a successful payment, celebrate + clean the URL.
+    if (new URLSearchParams(location.search).get("subscribed") === "1") {
+      subscribeCard.classList.add("hidden");
+      usagePill.textContent = "Subscribed ✓";
+      result.classList.remove("empty");
+      result.textContent = "🎉 Thanks for subscribing! You now have unlimited questions.";
+      history.replaceState(null, "", "/");
+    }
 
     await refreshScreen();
   })();
