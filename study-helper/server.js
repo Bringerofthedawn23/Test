@@ -30,9 +30,11 @@ const anthropic = new Anthropic();
 // ------------------------------------------------------------------
 const FREE_QUESTIONS = 5; // free questions each new user gets before paying
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+// Clean the URL: remove any accidental spaces or trailing slashes, which
+// otherwise create broken addresses like ".supabase.co//auth" -> "Invalid path".
+const SUPABASE_URL = (process.env.SUPABASE_URL || "").trim().replace(/\/+$/, "");
+const SUPABASE_ANON_KEY = (process.env.SUPABASE_ANON_KEY || "").trim();
+const SUPABASE_SERVICE_KEY = (process.env.SUPABASE_SERVICE_KEY || "").trim();
 
 // Backend admin client (uses the secret service key — can manage the usage
 // table safely). Only created if the keys are present, so the app still runs
