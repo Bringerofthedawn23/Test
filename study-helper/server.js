@@ -73,24 +73,45 @@ function recordUse(ip) {
 }
 
 // The instructions that turn Claude into a patient tutor.
-const SYSTEM_PROMPT = `You are a friendly tutor for students from 1st grade to
-the last year of high school. A student sends a photo or types a homework
+// Build the tutor instructions based on the student's chosen grade level and
+// how much detail they want. This is what makes the "grade level" and
+// "simple / more detail" controls on the page actually change the answer.
+function buildSystemPrompt(gradeLevel, detail) {
+  // How to speak for each grade group.
+  const gradeGuides = {
+    primary:
+      "The student is in PRIMARY school (about ages 6-11). Use very simple words a young child understands. Keep it gentle and encouraging.",
+    middle:
+      "The student is in MIDDLE school (about ages 12-14). Use clear, everyday words. A little more vocabulary is fine.",
+    high:
+      "The student is in HIGH school (about ages 15-18). You may use normal subject terms, but still explain them clearly.",
+  };
+  const gradeGuide = gradeGuides[gradeLevel] || gradeGuides.middle;
+
+  // How much detail to give.
+  const detailGuide =
+    detail === "detailed"
+      ? "Give a FULL explanation. Show every step and briefly explain WHY each step works, so the student really understands. Use as many steps as needed."
+      : "Keep it SIMPLE and SHORT. Only the key steps (aim for 3 to 5). One short sentence per step. No long paragraphs.";
+
+  return `You are a friendly tutor. A student sends a photo or types a homework
 question (any subject).
 
-Keep answers SIMPLE and SHORT:
-- Use very easy, everyday words. Explain like the student is a beginner.
-- Give only the key steps (aim for 3 to 5 short steps). Skip extra detail.
-- One short sentence per step. No long paragraphs. No hard vocabulary.
+${gradeGuide}
+
+${detailGuide}
+
+Always:
 - Number the steps.
 - End with one line: "Answer: ..." showing the final answer.
-
-If the photo is blurry or you can't read it, say so briefly and ask for a
-clearer photo. Never invent a problem that isn't there.`;
+- If a photo is blurry or unreadable, say so briefly and ask for a clearer one.
+- Never invent a problem that isn't there.`;
+}
 
 // This is the endpoint the web page calls when the user uploads a photo.
 app.post("/api/solve", async (req, res) => {
   try {
-    const { imageBase64, mediaType, questionText } = req.body;
+    const { imageBase64, mediaType, questionText, gradeLevel, detail } = req.body;
 
     const hasImage = Boolean(imageBase64);
     const hasText = Boolean(questionText && questionText.trim());
@@ -130,7 +151,7 @@ app.post("/api/solve", async (req, res) => {
     const response = await anthropic.messages.create({
       model: MODEL,
       max_tokens: 2000, // keeps answers focused and costs low
-      system: SYSTEM_PROMPT,
+      system: buildSystemPrompt(gradeLevel, detail),
       messages: [{ role: "user", content }],
     });
 

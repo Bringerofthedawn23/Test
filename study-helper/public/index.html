@@ -60,6 +60,25 @@
       .choices { grid-template-columns: 1fr; }
     }
 
+    /* Grade level + detail controls */
+    .options { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+    .option-group { flex: 1; min-width: 150px; }
+    .option-group label {
+      display: block; font-size: .78rem; color: var(--muted);
+      margin-bottom: 6px; font-weight: 600;
+    }
+    select {
+      width: 100%;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px;
+      font-size: .95rem;
+      font-family: inherit;
+    }
+    select:focus { outline: none; border-color: var(--accent); }
+
     textarea {
       width: 100%;
       min-height: 110px;
@@ -141,6 +160,24 @@
       <input type="file" id="galleryInput" accept="image/*" />
 
       <img id="preview" alt="Your homework" />
+
+      <div class="options">
+        <div class="option-group">
+          <label for="gradeLevel">School level</label>
+          <select id="gradeLevel">
+            <option value="primary">Primary (ages 6–11)</option>
+            <option value="middle" selected>Middle (ages 12–14)</option>
+            <option value="high">High school (ages 15–18)</option>
+          </select>
+        </div>
+        <div class="option-group">
+          <label for="detail">Explanation</label>
+          <select id="detail">
+            <option value="simple" selected>Simple &amp; short</option>
+            <option value="detailed">More detail</option>
+          </select>
+        </div>
+      </div>
 
       <button class="solve" id="solveBtn" disabled>Explain it to me</button>
     </div>
@@ -233,6 +270,8 @@
             imageBase64,
             mediaType,
             questionText: questionText.value,
+            gradeLevel: document.getElementById("gradeLevel").value,
+            detail: document.getElementById("detail").value,
           }),
         });
         const data = await res.json();
