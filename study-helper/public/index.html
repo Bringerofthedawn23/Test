@@ -13,6 +13,8 @@
       --text: #e2e8f0;
       --muted: #94a3b8;
       --border: #475569;
+      --danger: #f87171;
+      --ok: #34d399;
     }
     * { box-sizing: border-box; }
     body {
@@ -28,109 +30,86 @@
     .wrap { width: 100%; max-width: 640px; }
     h1 { font-size: 1.6rem; margin: 0 0 4px; }
     p.sub { color: var(--muted); margin: 0 0 24px; }
-    .card {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 20px;
+    .card { background: var(--card); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+    .hidden { display: none !important; }
+
+    /* Top bar: who's logged in + usage */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; flex-wrap: wrap; font-size: .85rem; margin-bottom: 16px;
+    }
+    .topbar .email { color: var(--muted); }
+    .usage-pill {
+      background: #0f172a; border: 1px solid var(--border);
+      border-radius: 999px; padding: 4px 12px; font-weight: 600;
+    }
+    .link-btn {
+      background: none; border: none; color: var(--muted);
+      cursor: pointer; font-size: .85rem; text-decoration: underline;
     }
 
-    /* The three big choice buttons */
-    .choices {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 4px;
+    /* Auth form */
+    .auth-title { font-size: 1.2rem; margin: 0 0 4px; }
+    .auth-sub { color: var(--muted); font-size: .9rem; margin: 0 0 16px; }
+    input[type="email"], input[type="password"] {
+      width: 100%; background: #0f172a; border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text); padding: 12px;
+      font-size: 1rem; margin-bottom: 12px;
     }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+
+    /* Input choice buttons */
+    .choices { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
     .choice {
-      background: #0f172a;
-      border: 1px solid var(--border);
-      color: var(--text);
-      border-radius: 12px;
-      padding: 16px 8px;
-      font-size: .85rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-align: center;
-      transition: border-color .2s, background .2s;
+      background: #0f172a; border: 1px solid var(--border); color: var(--text);
+      border-radius: 12px; padding: 16px 8px; font-size: .85rem; font-weight: 600;
+      cursor: pointer; text-align: center; transition: border-color .2s;
     }
     .choice:hover { border-color: var(--accent); }
     .choice .icon { display: block; font-size: 1.6rem; margin-bottom: 6px; }
-    @media (max-width: 420px) {
-      .choices { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 420px) { .choices { grid-template-columns: 1fr; } }
 
-    /* Grade level + detail controls */
     .options { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
     .option-group { flex: 1; min-width: 150px; }
-    .option-group label {
-      display: block; font-size: .78rem; color: var(--muted);
-      margin-bottom: 6px; font-weight: 600;
-    }
-    select {
-      width: 100%;
-      background: #0f172a;
-      border: 1px solid var(--border);
-      color: var(--text);
-      border-radius: 10px;
-      padding: 10px;
-      font-size: .95rem;
-      font-family: inherit;
-    }
-    select:focus { outline: none; border-color: var(--accent); }
+    .option-group label { display: block; font-size: .78rem; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+    select { width: 100%; background: #0f172a; border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 10px; font-size: .95rem; font-family: inherit; }
 
     textarea {
-      width: 100%;
-      min-height: 110px;
-      background: #0f172a;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      color: var(--text);
-      padding: 12px;
-      font-size: 1rem;
-      font-family: inherit;
-      resize: vertical;
-      margin-top: 14px;
-      display: none;
+      width: 100%; min-height: 110px; background: #0f172a; border: 1px solid var(--border);
+      border-radius: 12px; color: var(--text); padding: 12px; font-size: 1rem;
+      font-family: inherit; resize: vertical; margin-top: 14px; display: none;
     }
-    textarea:focus { outline: none; border-color: var(--accent); }
-
     input[type="file"] { display: none; }
-    img#preview {
-      max-width: 100%;
-      border-radius: 12px;
-      margin-top: 14px;
-      display: none;
+    img#preview { max-width: 100%; border-radius: 12px; margin-top: 14px; display: none; }
+
+    button.primary {
+      width: 100%; background: var(--accent); color: white; border: none;
+      padding: 14px; font-size: 1rem; font-weight: 600; border-radius: 12px;
+      cursor: pointer; margin-top: 16px; transition: background .2s;
     }
-    button.solve {
-      width: 100%;
-      background: var(--accent);
-      color: white;
-      border: none;
-      padding: 14px;
-      font-size: 1rem;
-      font-weight: 600;
-      border-radius: 12px;
-      cursor: pointer;
-      margin-top: 16px;
-      transition: background .2s;
-    }
-    button.solve:hover:not(:disabled) { background: var(--accent-hover); }
-    button.solve:disabled { opacity: .5; cursor: not-allowed; }
+    button.primary:hover:not(:disabled) { background: var(--accent-hover); }
+    button.primary:disabled { opacity: .5; cursor: not-allowed; }
+
+    .msg { font-size: .88rem; margin-top: 10px; min-height: 1.2em; }
+    .msg.error { color: var(--danger); }
+    .msg.ok { color: var(--ok); }
+    .switch { text-align: center; margin-top: 14px; font-size: .9rem; color: var(--muted); }
+    .switch a { color: var(--accent); cursor: pointer; }
 
     #result { white-space: pre-wrap; line-height: 1.6; font-size: 1rem; }
     #result.empty { color: var(--muted); }
     .spinner {
-      display: inline-block;
-      width: 18px; height: 18px;
-      border: 3px solid rgba(255,255,255,.3);
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin .8s linear infinite;
-      vertical-align: middle;
-      margin-right: 8px;
+      display: inline-block; width: 18px; height: 18px;
+      border: 3px solid rgba(255,255,255,.3); border-top-color: white;
+      border-radius: 50%; animation: spin .8s linear infinite;
+      vertical-align: middle; margin-right: 8px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Subscribe box shown when free questions run out */
+    .subscribe-box { text-align: center; padding: 8px 0; }
+    .subscribe-box h3 { margin: 0 0 8px; }
+    .price { font-size: 1.4rem; font-weight: 700; margin: 8px 0; }
     footer { text-align: center; color: var(--muted); font-size: .8rem; margin-top: 12px; }
   </style>
 </head>
@@ -139,57 +118,116 @@
     <h1>📚 Study Helper</h1>
     <p class="sub">Get a step-by-step explanation of any homework problem.</p>
 
-    <div class="card">
-      <div class="choices">
-        <button class="choice" id="btnType">
-          <span class="icon">⌨️</span>Type it
-        </button>
-        <button class="choice" id="btnCamera">
-          <span class="icon">📷</span>Take photo
-        </button>
-        <button class="choice" id="btnGallery">
-          <span class="icon">🖼️</span>From gallery
-        </button>
+    <!-- Loading state while we check login -->
+    <div class="card" id="loadingCard">Loading…</div>
+
+    <!-- ============ LOGIN / SIGNUP ============ -->
+    <div class="card hidden" id="authCard">
+      <h2 class="auth-title" id="authTitle">Create your free account</h2>
+      <p class="auth-sub" id="authSub">You get 5 free questions to start.</p>
+
+      <input type="email" id="authEmail" placeholder="Email address" autocomplete="email" />
+      <input type="password" id="authPassword" placeholder="Password (min 6 characters)" autocomplete="current-password" />
+
+      <button class="primary" id="authBtn">Create account</button>
+      <div class="msg" id="authMsg"></div>
+
+      <div class="switch" id="authSwitch">
+        Already have an account? <a id="switchLink">Sign in</a>
       </div>
-
-      <!-- Typing box (hidden until "Type it" is chosen) -->
-      <textarea id="questionText" placeholder="Type your question here, e.g. Solve for x: 2x + 5 = 13"></textarea>
-
-      <!-- Two hidden file inputs: one forces the camera, one opens the gallery -->
-      <input type="file" id="cameraInput" accept="image/*" capture="environment" />
-      <input type="file" id="galleryInput" accept="image/*" />
-
-      <img id="preview" alt="Your homework" />
-
-      <div class="options">
-        <div class="option-group">
-          <label for="gradeLevel">School level</label>
-          <select id="gradeLevel">
-            <option value="primary">Primary (ages 6–11)</option>
-            <option value="middle" selected>Middle (ages 12–14)</option>
-            <option value="high">High school (ages 15–18)</option>
-          </select>
-        </div>
-        <div class="option-group">
-          <label for="detail">Explanation</label>
-          <select id="detail">
-            <option value="simple" selected>Simple &amp; short</option>
-            <option value="detailed">More detail</option>
-          </select>
-        </div>
-      </div>
-
-      <button class="solve" id="solveBtn" disabled>Explain it to me</button>
     </div>
 
-    <div class="card">
-      <div id="result" class="empty">Your explanation will appear here.</div>
+    <!-- ============ THE APP (logged in) ============ -->
+    <div class="hidden" id="appArea">
+      <div class="topbar">
+        <span class="email" id="userEmail"></span>
+        <span class="usage-pill" id="usagePill"></span>
+        <button class="link-btn" id="logoutBtn">Log out</button>
+      </div>
+
+      <div class="card">
+        <div class="choices">
+          <button class="choice" id="btnType"><span class="icon">⌨️</span>Type it</button>
+          <button class="choice" id="btnCamera"><span class="icon">📷</span>Take photo</button>
+          <button class="choice" id="btnGallery"><span class="icon">🖼️</span>From gallery</button>
+        </div>
+
+        <textarea id="questionText" placeholder="Type your question here, e.g. Solve for x: 2x + 5 = 13"></textarea>
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" />
+        <input type="file" id="galleryInput" accept="image/*" />
+        <img id="preview" alt="Your homework" />
+
+        <div class="options">
+          <div class="option-group">
+            <label for="gradeLevel">School level</label>
+            <select id="gradeLevel">
+              <option value="primary">Primary (ages 6–11)</option>
+              <option value="middle" selected>Middle (ages 12–14)</option>
+              <option value="high">High school (ages 15–18)</option>
+            </select>
+          </div>
+          <div class="option-group">
+            <label for="detail">Explanation</label>
+            <select id="detail">
+              <option value="simple" selected>Simple &amp; short</option>
+              <option value="detailed">More detail</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="primary" id="solveBtn" disabled>Explain it to me</button>
+      </div>
+
+      <!-- Answer -->
+      <div class="card" id="resultCard">
+        <div id="result" class="empty">Your explanation will appear here.</div>
+      </div>
+
+      <!-- Subscribe wall (shown when free questions run out) -->
+      <div class="card subscribe-box hidden" id="subscribeCard">
+        <h3>You've used your 5 free questions 🎉</h3>
+        <p class="sub">Subscribe to get unlimited help.</p>
+        <div class="price">€4.99 / month</div>
+        <button class="primary" id="subscribeBtn">Subscribe</button>
+        <div class="msg" id="subscribeMsg"></div>
+      </div>
     </div>
 
     <footer>Powered by Claude</footer>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+  (async function () {
+    // ---- Load config + connect to Supabase ----
+    const cfg = await fetch("/api/config").then((r) => r.json());
+    const loadingCard = document.getElementById("loadingCard");
+    const authCard = document.getElementById("authCard");
+    const appArea = document.getElementById("appArea");
+
+    if (!cfg.accountsEnabled) {
+      loadingCard.textContent =
+        "Accounts are not set up yet. Add your Supabase keys to enable login.";
+      return;
+    }
+
+    const supabase = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    const FREE = cfg.freeQuestions;
+
+    // ---- Elements ----
+    const authTitle = document.getElementById("authTitle");
+    const authSub = document.getElementById("authSub");
+    const authEmail = document.getElementById("authEmail");
+    const authPassword = document.getElementById("authPassword");
+    const authBtn = document.getElementById("authBtn");
+    const authMsg = document.getElementById("authMsg");
+    const authSwitch = document.getElementById("authSwitch");
+    const switchLink = document.getElementById("switchLink");
+
+    const userEmail = document.getElementById("userEmail");
+    const usagePill = document.getElementById("usagePill");
+    const logoutBtn = document.getElementById("logoutBtn");
+
     const btnType = document.getElementById("btnType");
     const btnCamera = document.getElementById("btnCamera");
     const btnGallery = document.getElementById("btnGallery");
@@ -199,47 +237,113 @@
     const preview = document.getElementById("preview");
     const solveBtn = document.getElementById("solveBtn");
     const result = document.getElementById("result");
+    const subscribeCard = document.getElementById("subscribeCard");
+    const subscribeBtn = document.getElementById("subscribeBtn");
+    const subscribeMsg = document.getElementById("subscribeMsg");
 
     let imageBase64 = null;
     let mediaType = null;
+    let mode = "signup"; // "signup" or "login"
 
-    // Enable the "Explain" button when there's either text or an image.
+    // ---- Show the right screen based on login state ----
+    async function refreshScreen() {
+      const { data } = await supabase.auth.getSession();
+      loadingCard.classList.add("hidden");
+      if (data.session) {
+        authCard.classList.add("hidden");
+        appArea.classList.remove("hidden");
+        userEmail.textContent = data.session.user.email;
+      } else {
+        appArea.classList.add("hidden");
+        authCard.classList.remove("hidden");
+      }
+    }
+
+    // ---- Auth: toggle between signup and login ----
+    switchLink.addEventListener("click", () => {
+      mode = mode === "signup" ? "login" : "signup";
+      if (mode === "signup") {
+        authTitle.textContent = "Create your free account";
+        authSub.textContent = "You get 5 free questions to start.";
+        authBtn.textContent = "Create account";
+        authSwitch.innerHTML = 'Already have an account? <a id="switchLink">Sign in</a>';
+      } else {
+        authTitle.textContent = "Welcome back";
+        authSub.textContent = "Sign in to keep studying.";
+        authBtn.textContent = "Sign in";
+        authSwitch.innerHTML = 'Need an account? <a id="switchLink">Create one</a>';
+      }
+      document.getElementById("switchLink").addEventListener("click", () =>
+        switchLink.click()
+      );
+      authMsg.textContent = "";
+    });
+
+    authBtn.addEventListener("click", async () => {
+      const email = authEmail.value.trim();
+      const password = authPassword.value;
+      authMsg.className = "msg";
+      authMsg.textContent = "";
+      if (!email || !password) {
+        authMsg.className = "msg error";
+        authMsg.textContent = "Please enter your email and password.";
+        return;
+      }
+      authBtn.disabled = true;
+      authBtn.textContent = "Please wait…";
+
+      if (mode === "signup") {
+        const { data, error } = await supabase.auth.signUp({ email, password });
+        if (error) {
+          authMsg.className = "msg error";
+          authMsg.textContent = error.message;
+        } else if (!data.session) {
+          // Email confirmation is on — user must verify first.
+          authMsg.className = "msg ok";
+          authMsg.textContent = "Account created! Check your email to confirm, then sign in.";
+        } else {
+          await refreshScreen();
+        }
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          authMsg.className = "msg error";
+          authMsg.textContent = error.message;
+        } else {
+          await refreshScreen();
+        }
+      }
+      authBtn.disabled = false;
+      authBtn.textContent = mode === "signup" ? "Create account" : "Sign in";
+    });
+
+    logoutBtn.addEventListener("click", async () => {
+      await supabase.auth.signOut();
+      location.reload();
+    });
+
+    // ---- Input handling ----
     function refreshButton() {
       const hasText = questionText.value.trim().length > 0;
-      const hasImage = imageBase64 !== null;
-      solveBtn.disabled = !(hasText || hasImage);
+      solveBtn.disabled = !(hasText || imageBase64 !== null);
     }
-
-    // Clear any previously chosen image (used when switching to typing).
     function clearImage() {
-      imageBase64 = null;
-      mediaType = null;
-      preview.style.display = "none";
-      preview.src = "";
+      imageBase64 = null; mediaType = null;
+      preview.style.display = "none"; preview.src = "";
     }
-
-    // --- Choice buttons ---
     btnType.addEventListener("click", () => {
       clearImage();
       questionText.style.display = "block";
       questionText.focus();
       refreshButton();
     });
-
-    btnCamera.addEventListener("click", () => {
-      cameraInput.click(); // opens the phone camera
-    });
-
-    btnGallery.addEventListener("click", () => {
-      galleryInput.click(); // opens the photo gallery / file picker
-    });
-
+    btnCamera.addEventListener("click", () => cameraInput.click());
+    btnGallery.addEventListener("click", () => galleryInput.click());
     questionText.addEventListener("input", refreshButton);
 
-    // --- Handle a chosen image (from either camera or gallery) ---
     function handleFile(file) {
       if (!file) return;
-      questionText.style.display = "none"; // hide typing box when using a photo
+      questionText.style.display = "none";
       questionText.value = "";
       mediaType = file.type;
       const reader = new FileReader();
@@ -251,12 +355,14 @@
       };
       reader.readAsDataURL(file);
     }
-
     cameraInput.addEventListener("change", () => handleFile(cameraInput.files[0]));
     galleryInput.addEventListener("change", () => handleFile(galleryInput.files[0]));
 
-    // --- Send to the server ---
+    // ---- Solve ----
     solveBtn.addEventListener("click", async () => {
+      const { data: sess } = await supabase.auth.getSession();
+      if (!sess.session) { location.reload(); return; }
+
       solveBtn.disabled = true;
       solveBtn.innerHTML = '<span class="spinner"></span>Thinking...';
       result.classList.remove("empty");
@@ -265,17 +371,36 @@
       try {
         const res = await fetch("/api/solve", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + sess.session.access_token,
+          },
           body: JSON.stringify({
-            imageBase64,
-            mediaType,
+            imageBase64, mediaType,
             questionText: questionText.value,
             gradeLevel: document.getElementById("gradeLevel").value,
             detail: document.getElementById("detail").value,
           }),
         });
         const data = await res.json();
-        result.textContent = data.error ? "⚠️ " + data.error : data.answer;
+
+        if (res.status === 402 || data.limitReached) {
+          // Free questions used up — show the subscribe wall.
+          subscribeCard.classList.remove("hidden");
+          result.textContent = data.error || "You've used your free questions.";
+          usagePill.textContent = `${FREE} / ${FREE} used`;
+        } else if (data.error) {
+          result.textContent = "⚠️ " + data.error;
+        } else {
+          result.textContent = data.answer;
+          if (data.questionsUsed !== null && !data.subscribed) {
+            const left = Math.max(0, FREE - data.questionsUsed);
+            usagePill.textContent = `${left} free left`;
+            if (left === 0) subscribeCard.classList.remove("hidden");
+          } else if (data.subscribed) {
+            usagePill.textContent = "Subscribed ✓";
+          }
+        }
       } catch (err) {
         result.textContent = "⚠️ Could not reach the server. Please try again.";
       } finally {
@@ -284,6 +409,15 @@
         refreshButton();
       }
     });
+
+    // Subscribe button — payment gets wired in Part 3b (Stripe).
+    subscribeBtn.addEventListener("click", () => {
+      subscribeMsg.className = "msg";
+      subscribeMsg.textContent = "Payments are being set up — coming very soon!";
+    });
+
+    await refreshScreen();
+  })();
   </script>
 </body>
 </html>

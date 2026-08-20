@@ -9,9 +9,10 @@
 // You do NOT need to edit this file to use the app. Just follow README.md.
 // ------------------------------------------------------------------
 
-import "dotenv/config"; // loads your secret API key from the .env file
+import "dotenv/config"; // loads your secret keys from the .env file
 import express from "express";
 import Anthropic from "@anthropic-ai/sdk";
+import { createClient } from "@supabase/supabase-js";
 
 const app = express();
 
@@ -23,6 +24,69 @@ app.use(express.static("public"));
 
 // Create the Claude client. It automatically reads ANTHROPIC_API_KEY from .env
 const anthropic = new Anthropic();
+
+// ------------------------------------------------------------------
+// ACCOUNTS + FREE TRIAL (Supabase)
+// ------------------------------------------------------------------
+const FREE_QUESTIONS = 5; // free questions each new user gets before paying
+
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+
+// Backend admin client (uses the secret service key — can manage the usage
+// table safely). Only created if the keys are present, so the app still runs
+// locally without accounts while you set Supabase up.
+const supabaseAdmin =
+  SUPABASE_URL && SUPABASE_SERVICE_KEY
+    ? createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      })
+    : null;
+
+// The page fetches this to know how to connect to Supabase for login/signup.
+// These two values are safe to be public.
+app.get("/api/config", (req, res) => {
+  res.json({
+    supabaseUrl: SUPABASE_URL || "",
+    supabaseAnonKey: SUPABASE_ANON_KEY || "",
+    accountsEnabled: Boolean(supabaseAdmin),
+    freeQuestions: FREE_QUESTIONS,
+  });
+});
+
+// Given a request, find the logged-in user from their access token.
+// Returns the Supabase user object, or null if not logged in / invalid.
+async function getUser(req) {
+  if (!supabaseAdmin) return null;
+  const auth = req.headers.authorization || "";
+  const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
+  if (!token) return null;
+  const { data, error } = await supabaseAdmin.auth.getUser(token);
+  if (error) return null;
+  return data.user || null;
+}
+
+// Read (or create) a user's usage row.
+async function getUsage(userId) {
+  const { data } = await supabaseAdmin
+    .from("study_usage")
+    .select("questions_used, is_subscribed")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (data) return data;
+  // First time we've seen this user — create their row.
+  await supabaseAdmin.from("study_usage").insert({ user_id: userId });
+  return { questions_used: 0, is_subscribed: false };
+}
+
+// Add one to a user's question count.
+async function incrementUsage(userId, current) {
+  await supabaseAdmin
+    .from("study_usage")
+    .update({ questions_used: current + 1, updated_at: new Date().toISOString() })
+    .eq("user_id", userId);
+}
 
 // Which Claude model to use.
 //   claude-sonnet-5  -> best balance for math + handwriting (recommended)
@@ -138,7 +202,26 @@ app.post("/api/solve", async (req, res) => {
         .json({ error: "Please upload a photo or type a question first." });
     }
 
-    // Credit protection: block the request if a limit is hit.
+    // --- Account + free-trial check (only if accounts are turned on) ---
+    let user = null;
+    let usage = null;
+    if (supabaseAdmin) {
+      user = await getUser(req);
+      if (!user) {
+        return res
+          .status(401)
+          .json({ error: "Please sign in or create a free account to continue." });
+      }
+      usage = await getUsage(user.id);
+      if (!usage.is_subscribed && usage.questions_used >= FREE_QUESTIONS) {
+        return res.status(402).json({
+          error: `You've used all ${FREE_QUESTIONS} free questions. Subscribe to keep going.`,
+          limitReached: true,
+        });
+      }
+    }
+
+    // Credit protection: block the request if a global safety limit is hit.
     const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown";
     const limitMessage = checkLimit(ip);
     if (limitMessage) {
@@ -177,8 +260,24 @@ app.post("/api/solve", async (req, res) => {
       .map((block) => block.text)
       .join("\n");
 
-    recordUse(ip); // count this question toward the limits
-    res.json({ answer });
+    recordUse(ip); // count this question toward the global safety limit
+
+    // Count this question toward the user's free trial, and tell the page how
+    // many free questions they have left.
+    let questionsUsed = null;
+    let subscribed = false;
+    if (supabaseAdmin && user && usage) {
+      await incrementUsage(user.id, usage.questions_used);
+      questionsUsed = usage.questions_used + 1;
+      subscribed = usage.is_subscribed;
+    }
+
+    res.json({
+      answer,
+      questionsUsed,
+      freeLimit: FREE_QUESTIONS,
+      subscribed,
+    });
   } catch (err) {
     console.error("Error talking to Claude:", err);
 
