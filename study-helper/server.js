@@ -92,10 +92,15 @@ there. Adapt your wording to the apparent grade level of the work.`;
 // This is the endpoint the web page calls when the user uploads a photo.
 app.post("/api/solve", async (req, res) => {
   try {
-    const { imageBase64, mediaType } = req.body;
+    const { imageBase64, mediaType, questionText } = req.body;
 
-    if (!imageBase64) {
-      return res.status(400).json({ error: "No image was received." });
+    const hasImage = Boolean(imageBase64);
+    const hasText = Boolean(questionText && questionText.trim());
+
+    if (!hasImage && !hasText) {
+      return res
+        .status(400)
+        .json({ error: "Please upload a photo or type a question first." });
     }
 
     // Credit protection: block the request if a limit is hit.
@@ -105,29 +110,30 @@ app.post("/api/solve", async (req, res) => {
       return res.status(429).json({ error: limitMessage });
     }
 
+    // Build the message content. Include the image only if one was sent.
+    const content = [];
+    if (hasImage) {
+      content.push({
+        type: "image",
+        source: {
+          type: "base64",
+          media_type: mediaType || "image/jpeg",
+          data: imageBase64,
+        },
+      });
+    }
+    content.push({
+      type: "text",
+      text: hasText
+        ? `Here is my homework question:\n\n${questionText.trim()}\n\nPlease explain how to solve it step by step.`
+        : "Here is my homework. Please explain how to solve it step by step.",
+    });
+
     const response = await anthropic.messages.create({
       model: MODEL,
       max_tokens: 2000, // keeps answers focused and costs low
       system: SYSTEM_PROMPT,
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "image",
-              source: {
-                type: "base64",
-                media_type: mediaType || "image/jpeg",
-                data: imageBase64,
-              },
-            },
-            {
-              type: "text",
-              text: "Here is my homework. Please explain how to solve it step by step.",
-            },
-          ],
-        },
-      ],
+      messages: [{ role: "user", content }],
     });
 
     // Pull the plain text out of Claude's reply.

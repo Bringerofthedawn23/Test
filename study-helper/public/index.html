@@ -12,6 +12,7 @@
       --accent-hover: #4f46e5;
       --text: #e2e8f0;
       --muted: #94a3b8;
+      --border: #475569;
     }
     * { box-sizing: border-box; }
     body {
@@ -33,25 +34,56 @@
       padding: 20px;
       margin-bottom: 20px;
     }
-    label.upload {
-      display: block;
-      border: 2px dashed #475569;
-      border-radius: 12px;
-      padding: 32px 16px;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color .2s;
+
+    /* The three big choice buttons */
+    .choices {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 4px;
     }
-    label.upload:hover { border-color: var(--accent); }
-    label.upload span { color: var(--muted); font-size: .95rem; }
+    .choice {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 16px 8px;
+      font-size: .85rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color .2s, background .2s;
+    }
+    .choice:hover { border-color: var(--accent); }
+    .choice .icon { display: block; font-size: 1.6rem; margin-bottom: 6px; }
+    @media (max-width: 420px) {
+      .choices { grid-template-columns: 1fr; }
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 110px;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      padding: 12px;
+      font-size: 1rem;
+      font-family: inherit;
+      resize: vertical;
+      margin-top: 14px;
+      display: none;
+    }
+    textarea:focus { outline: none; border-color: var(--accent); }
+
     input[type="file"] { display: none; }
     img#preview {
       max-width: 100%;
       border-radius: 12px;
-      margin-top: 16px;
+      margin-top: 14px;
       display: none;
     }
-    button {
+    button.solve {
       width: 100%;
       background: var(--accent);
       color: white;
@@ -64,13 +96,10 @@
       margin-top: 16px;
       transition: background .2s;
     }
-    button:hover:not(:disabled) { background: var(--accent-hover); }
-    button:disabled { opacity: .5; cursor: not-allowed; }
-    #result {
-      white-space: pre-wrap;
-      line-height: 1.6;
-      font-size: 1rem;
-    }
+    button.solve:hover:not(:disabled) { background: var(--accent-hover); }
+    button.solve:disabled { opacity: .5; cursor: not-allowed; }
+
+    #result { white-space: pre-wrap; line-height: 1.6; font-size: 1rem; }
     #result.empty { color: var(--muted); }
     .spinner {
       display: inline-block;
@@ -89,16 +118,31 @@
 <body>
   <div class="wrap">
     <h1>📚 Study Helper</h1>
-    <p class="sub">Take a photo of your homework and get a step-by-step explanation.</p>
+    <p class="sub">Get a step-by-step explanation of any homework problem.</p>
 
     <div class="card">
-      <label class="upload" for="fileInput">
-        📷 <strong>Tap to choose a photo</strong><br />
-        <span>or take one with your camera</span>
-      </label>
-      <input type="file" id="fileInput" accept="image/*" capture="environment" />
+      <div class="choices">
+        <button class="choice" id="btnType">
+          <span class="icon">⌨️</span>Type it
+        </button>
+        <button class="choice" id="btnCamera">
+          <span class="icon">📷</span>Take photo
+        </button>
+        <button class="choice" id="btnGallery">
+          <span class="icon">🖼️</span>From gallery
+        </button>
+      </div>
+
+      <!-- Typing box (hidden until "Type it" is chosen) -->
+      <textarea id="questionText" placeholder="Type your question here, e.g. Solve for x: 2x + 5 = 13"></textarea>
+
+      <!-- Two hidden file inputs: one forces the camera, one opens the gallery -->
+      <input type="file" id="cameraInput" accept="image/*" capture="environment" />
+      <input type="file" id="galleryInput" accept="image/*" />
+
       <img id="preview" alt="Your homework" />
-      <button id="solveBtn" disabled>Explain it to me</button>
+
+      <button class="solve" id="solveBtn" disabled>Explain it to me</button>
     </div>
 
     <div class="card">
@@ -109,7 +153,12 @@
   </div>
 
   <script>
-    const fileInput = document.getElementById("fileInput");
+    const btnType = document.getElementById("btnType");
+    const btnCamera = document.getElementById("btnCamera");
+    const btnGallery = document.getElementById("btnGallery");
+    const questionText = document.getElementById("questionText");
+    const cameraInput = document.getElementById("cameraInput");
+    const galleryInput = document.getElementById("galleryInput");
     const preview = document.getElementById("preview");
     const solveBtn = document.getElementById("solveBtn");
     const result = document.getElementById("result");
@@ -117,26 +166,60 @@
     let imageBase64 = null;
     let mediaType = null;
 
-    fileInput.addEventListener("change", () => {
-      const file = fileInput.files[0];
-      if (!file) return;
+    // Enable the "Explain" button when there's either text or an image.
+    function refreshButton() {
+      const hasText = questionText.value.trim().length > 0;
+      const hasImage = imageBase64 !== null;
+      solveBtn.disabled = !(hasText || hasImage);
+    }
 
-      mediaType = file.type; // e.g. "image/jpeg"
+    // Clear any previously chosen image (used when switching to typing).
+    function clearImage() {
+      imageBase64 = null;
+      mediaType = null;
+      preview.style.display = "none";
+      preview.src = "";
+    }
+
+    // --- Choice buttons ---
+    btnType.addEventListener("click", () => {
+      clearImage();
+      questionText.style.display = "block";
+      questionText.focus();
+      refreshButton();
+    });
+
+    btnCamera.addEventListener("click", () => {
+      cameraInput.click(); // opens the phone camera
+    });
+
+    btnGallery.addEventListener("click", () => {
+      galleryInput.click(); // opens the photo gallery / file picker
+    });
+
+    questionText.addEventListener("input", refreshButton);
+
+    // --- Handle a chosen image (from either camera or gallery) ---
+    function handleFile(file) {
+      if (!file) return;
+      questionText.style.display = "none"; // hide typing box when using a photo
+      questionText.value = "";
+      mediaType = file.type;
       const reader = new FileReader();
       reader.onload = () => {
-        // reader.result looks like: "data:image/jpeg;base64,AAAA..."
-        // We only need the part after the comma.
         imageBase64 = reader.result.split(",")[1];
         preview.src = reader.result;
         preview.style.display = "block";
-        solveBtn.disabled = false;
+        refreshButton();
       };
       reader.readAsDataURL(file);
-    });
+    }
 
+    cameraInput.addEventListener("change", () => handleFile(cameraInput.files[0]));
+    galleryInput.addEventListener("change", () => handleFile(galleryInput.files[0]));
+
+    // --- Send to the server ---
     solveBtn.addEventListener("click", async () => {
-      if (!imageBase64) return;
-
       solveBtn.disabled = true;
       solveBtn.innerHTML = '<span class="spinner"></span>Thinking...';
       result.classList.remove("empty");
@@ -146,20 +229,20 @@
         const res = await fetch("/api/solve", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ imageBase64, mediaType }),
+          body: JSON.stringify({
+            imageBase64,
+            mediaType,
+            questionText: questionText.value,
+          }),
         });
         const data = await res.json();
-
-        if (data.error) {
-          result.textContent = "⚠️ " + data.error;
-        } else {
-          result.textContent = data.answer;
-        }
+        result.textContent = data.error ? "⚠️ " + data.error : data.answer;
       } catch (err) {
-        result.textContent = "⚠️ Could not reach the server. Is it running?";
+        result.textContent = "⚠️ Could not reach the server. Please try again.";
       } finally {
         solveBtn.disabled = false;
         solveBtn.textContent = "Explain it to me";
+        refreshButton();
       }
     });
   </script>
