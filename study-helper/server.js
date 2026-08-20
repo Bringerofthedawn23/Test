@@ -29,6 +29,49 @@ const anthropic = new Anthropic();
 //   claude-haiku-4-5 -> cheaper, still good, slightly less sharp on messy handwriting
 const MODEL = "claude-sonnet-5";
 
+// ------------------------------------------------------------------
+// CREDIT PROTECTION (safety net)
+// The app is public once online, so we cap how many questions can be
+// answered. This stops a leaked link from draining your Claude balance.
+// Change these numbers any time. (This resets whenever the server restarts.)
+// ------------------------------------------------------------------
+const MAX_QUESTIONS_PER_DAY = 100; // total across everyone
+const MAX_QUESTIONS_PER_IP_PER_HOUR = 15; // per single visitor
+
+let dayStamp = new Date().toDateString();
+let questionsToday = 0;
+const ipHits = new Map(); // ip -> { hour, count }
+
+function checkLimit(ip) {
+  // Reset the daily counter when the date changes.
+  const today = new Date().toDateString();
+  if (today !== dayStamp) {
+    dayStamp = today;
+    questionsToday = 0;
+    ipHits.clear();
+  }
+  if (questionsToday >= MAX_QUESTIONS_PER_DAY) {
+    return "The app has reached its daily question limit. Please try again tomorrow.";
+  }
+
+  // Per-visitor hourly limit.
+  const hour = new Date().getHours();
+  const rec = ipHits.get(ip);
+  if (!rec || rec.hour !== hour) {
+    ipHits.set(ip, { hour, count: 0 });
+  }
+  if (ipHits.get(ip).count >= MAX_QUESTIONS_PER_IP_PER_HOUR) {
+    return "You've asked a lot of questions this hour. Please take a short break and try again later.";
+  }
+  return null; // null means "allowed"
+}
+
+function recordUse(ip) {
+  questionsToday++;
+  const rec = ipHits.get(ip);
+  if (rec) rec.count++;
+}
+
 // The instructions that turn Claude into a patient tutor.
 const SYSTEM_PROMPT = `You are a friendly, patient study tutor for students from
 1st grade through the last year of high school. A student will send you a photo
@@ -53,6 +96,13 @@ app.post("/api/solve", async (req, res) => {
 
     if (!imageBase64) {
       return res.status(400).json({ error: "No image was received." });
+    }
+
+    // Credit protection: block the request if a limit is hit.
+    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown";
+    const limitMessage = checkLimit(ip);
+    if (limitMessage) {
+      return res.status(429).json({ error: limitMessage });
     }
 
     const response = await anthropic.messages.create({
@@ -86,6 +136,7 @@ app.post("/api/solve", async (req, res) => {
       .map((block) => block.text)
       .join("\n");
 
+    recordUse(ip); // count this question toward the limits
     res.json({ answer });
   } catch (err) {
     console.error("Error talking to Claude:", err);
