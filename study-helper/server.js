@@ -111,7 +111,17 @@ Always:
 - Number the steps.
 - End with one line: "Answer: ..." showing the final answer.
 - If a photo is blurry or unreadable, say so briefly and ask for a clearer one.
-- Never invent a problem that isn't there.`;
+- Never invent a problem that isn't there.
+
+FORMATTING (very important — the app shows plain text, not typeset math):
+- Do NOT use LaTeX or dollar signs. Never write $ or $$ around math.
+- Do NOT use Markdown headings (#) or ** for bold.
+- Write ALL math in plain text, exactly as you'd type it on a keyboard:
+  * powers: x^2  (not superscripts)
+  * multiply: *   divide: /   square root: sqrt(...)
+  * fractions: (a + b) / c
+  * plus-or-minus: +/-
+- Keep everything readable as plain text on its own line.`;
 }
 
 // This is the endpoint the web page calls when the user uploads a photo.
